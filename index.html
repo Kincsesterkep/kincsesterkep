@@ -29,6 +29,55 @@
             background-size: cover;
         }
     </style>
+    <style>
+        /* === Auth (profile) styles — namespaced with auth- to avoid collisions === */
+        .auth-modal[hidden]{ display:none; }
+        .auth-modal{ position: fixed; inset:0; z-index: 1000; }
+        .auth-backdrop{ position:absolute; inset:0; background: rgba(0,0,0,0.55); backdrop-filter: blur(3px); }
+        .auth-dialog{
+          position: relative; margin: 6vh auto 0; width: min(92vw, 440px);
+          background: var(--surface, #121624); color: var(--text, #e8eaf6);
+          border: 1px solid var(--border, #2a2f45); border-radius: 16px; padding: 18px;
+          box-shadow: 0 25px 80px rgba(0,0,0,0.45);
+        }
+        .auth-close{ position:absolute; top:8px; right:10px; border:0; background:transparent; color: var(--muted, #b7bfd6); font-size: 22px; line-height: 1; cursor: pointer; }
+        .auth-tabs{ display: grid; grid-auto-flow: column; gap: 8px; margin-bottom: 12px; }
+        .auth-tab{
+          border:1px solid var(--border, #2a2f45); background: #0e1222; color: var(--muted, #b7bfd6);
+          padding: 8px 10px; border-radius: 999px; cursor: pointer;
+        }
+        .auth-tab.is-active{ background: var(--card, #161b33); color: var(--text, #e8eaf6); }
+        .auth-panel[hidden]{ display:none; }
+        .auth-panel.is-active{ display:block; }
+        .auth-form{ display:grid; gap: 10px; }
+        .auth-form label{ display:grid; gap:6px; font-weight:600; }
+        .auth-form input{
+          background:#0c1022; color: var(--text, #e8eaf6);
+          border:1px solid var(--border, #2a2f45); border-radius: 10px; padding:10px 12px;
+        }
+        .auth-status{ min-height: 1.4em; font-size: 0.95em; color: var(--muted, #b7bfd6); }
+
+        .auth-profile-dropdown[hidden]{ display:none; }
+        .auth-profile-dropdown{
+          position: absolute;
+          right: 20px; top: 58px; z-index: 1001;
+          width: 260px; padding: 12px;
+          border:1px solid var(--border, #2a2f45); border-radius: 14px;
+          background: var(--card, #161b33); box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+        }
+        .auth-profile-summary{ display:flex; align-items:center; gap:10px; padding: 6px 4px 12px; border-bottom:1px solid var(--border, #2a2f45); }
+        .auth-avatar{ width:36px; height:36px; display:grid; place-items:center; border-radius: 50%; background:#0c1022; }
+        .auth-who{ display:grid; line-height:1.2; color: var(--muted, #b7bfd6); }
+        .auth-who strong{ color: var(--text, #e8eaf6); }
+        .auth-profile-actions{ display:grid; gap:8px; padding-top:10px; }
+        .auth-pd-link, .auth-pd-btn{
+          display:block; width:100%; text-align:left; text-decoration:none;
+          border:1px solid var(--border, #2a2f45); background:#0e1222; color: var(--text, #e8eaf6);
+          padding:10px 12px; border-radius: 10px; cursor:pointer;
+        }
+        .auth-pd-link:hover, .auth-pd-btn:hover{ filter: brightness(1.05); }
+    </style>
+
 </head>
 <body class="bg-amber-50 font-sans">
     <!-- Navigation -->
@@ -39,7 +88,7 @@
                 <span class="text-xl font-bold">Kincsestérkép</span>
             </div>
             <div class="hidden md:flex space-x-6">
-                <a href="#my profile" class="hover:text-amber-200 transition">My Profile</a>
+                <a id="authProfileLink" href="#" data-auth="gate">My Profile</a>
                 <a href="#competitions" class="hover:text-amber-200 transition">Competitions</a>
                 <a href="#about" class="hover:text-amber-200 transition">About</a>
                 <a href="#faq" class="hover:text-amber-200 transition">FAQ</a>
@@ -368,6 +417,71 @@
         </div>
     </div>
 
+    <!-- Auth Modal (separate from your competition Signup Modal) -->
+    <div id="authModal" class="auth-modal" hidden>
+      <div class="auth-backdrop" data-auth-close="true"></div>
+      <div class="auth-dialog" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+        <button class="auth-close" aria-label="Close" data-auth-close="true">×</button>
+
+        <div class="auth-tabs" role="tablist" aria-label="Authentication">
+          <button id="authTabLogin" class="auth-tab is-active" role="tab" aria-selected="true" data-auth-tab="login">Log in</button>
+          <button id="authTabSignup" class="auth-tab" role="tab" aria-selected="false" data-auth-tab="signup">Sign up</button>
+        </div>
+
+        <section class="auth-panel is-active" id="authLoginPanel" role="tabpanel" aria-labelledby="authTabLogin">
+          <h2 id="authTitle">Welcome back</h2>
+          <form id="authLoginForm" class="auth-form" autocomplete="on">
+            <label>
+              Username
+              <input name="username" type="text" required autocomplete="username" />
+            </label>
+            <label>
+              Password
+              <input name="password" type="password" required autocomplete="current-password" />
+            </label>
+            <button type="submit" class="btn primary">Log in</button>
+            <p class="auth-status" id="authLoginStatus"></p>
+          </form>
+        </section>
+
+        <section class="auth-panel" id="authSignupPanel" role="tabpanel" aria-labelledby="authTabSignup" hidden>
+          <h2>Create your account</h2>
+          <form id="authSignupForm" class="auth-form" autocomplete="on">
+            <label>
+              Username
+              <input name="username" type="text" minlength="3" maxlength="24" required autocomplete="username" />
+            </label>
+            <label>
+              Password
+              <input name="password" type="password" minlength="6" required autocomplete="new-password" />
+            </label>
+            <label>
+              Confirm password
+              <input name="confirm" type="password" minlength="6" required autocomplete="new-password" />
+            </label>
+            <button type="submit" class="btn primary">Sign up</button>
+            <p class="auth-status" id="authSignupStatus"></p>
+          </form>
+        </section>
+      </div>
+    </div>
+
+    <!-- Profile Dropdown (visible when logged in) -->
+    <div id="authProfileDropdown" class="auth-profile-dropdown" hidden>
+      <div class="auth-profile-summary">
+        <div class="auth-avatar" aria-hidden="true">👤</div>
+        <div class="auth-who">
+          <strong id="authPdName">User</strong>
+          <span>Signed in</span>
+        </div>
+      </div>
+      <div class="auth-profile-actions">
+        <!-- Update href once your profile page exists -->
+        <a id="authGoProfile" href="/profile.html" class="auth-pd-link">My Profile</a>
+        <button id="authLogoutBtn" class="auth-pd-btn">Log out</button>
+      </div>
+    </div>
+
     <!-- Footer -->
     <footer class="bg-amber-900 text-amber-200 py-12">
         <div class="container mx-auto px-4">
@@ -546,6 +660,176 @@
                 }
             });
         });
+        <script>
+        /* ======= AUTH (profiles) — local-only demo auth with salted SHA-256 in localStorage ======= */
+        (() => {
+          // ---- Storage & hashing ----
+          const USERS_KEY = "auth.users.v1";
+          const SESSION_KEY = "auth.session.user";
+
+          const b64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
+          const enc = (s) => new TextEncoder().encode(s);
+          async function sha256(str){ const buf = await crypto.subtle.digest("SHA-256", enc(str)); return b64(buf); }
+          function getUsers(){ try { return JSON.parse(localStorage.getItem(USERS_KEY) || "{}"); } catch { return {}; } }
+          function setUsers(obj){ localStorage.setItem(USERS_KEY, JSON.stringify(obj)); }
+          function getSession(){ return localStorage.getItem(SESSION_KEY); }
+          function setSession(username){ localStorage.setItem(SESSION_KEY, username); }
+          function clearSession(){ localStorage.removeItem(SESSION_KEY); }
+          function randomSalt(len=16){ const a = new Uint8Array(len); crypto.getRandomValues(a); return btoa(String.fromCharCode(...a)); }
+
+          async function signup(username, password){
+            username = String(username||"").trim().toLowerCase();
+            if(!username || !password) throw new Error("Missing credentials.");
+            const users = getUsers();
+            if(users[username]) throw new Error("Username already exists.");
+            const salt = randomSalt();
+            const passwordHash = await sha256(salt + ":" + password);
+            users[username] = { salt, passwordHash, createdAt: Date.now() };
+            setUsers(users);
+            setSession(username);
+            return username;
+          }
+          async function login(username, password){
+            username = String(username||"").trim().toLowerCase();
+            const users = getUsers();
+            const rec = users[username];
+            if(!rec) throw new Error("Invalid username or password.");
+            const testHash = await sha256(rec.salt + ":" + password);
+            if(testHash !== rec.passwordHash) throw new Error("Invalid username or password.");
+            setSession(username);
+            return username;
+          }
+          function logout(){ clearSession(); }
+
+          // ---- Elements ----
+          const profileLink = document.getElementById("authProfileLink"); // nav item
+          const dropdown = document.getElementById("authProfileDropdown");
+          const pdName = document.getElementById("authPdName");
+          const goProfile = document.getElementById("authGoProfile");
+          const logoutBtn = document.getElementById("authLogoutBtn");
+
+          const modal = document.getElementById("authModal");
+          const loginForm = document.getElementById("authLoginForm");
+          const signupForm = document.getElementById("authSignupForm");
+          const loginStatus = document.getElementById("authLoginStatus");
+          const signupStatus = document.getElementById("authSignupStatus");
+          const tabs = Array.from(document.querySelectorAll("[data-auth-tab]"));
+          const loginPanel = document.getElementById("authLoginPanel");
+          const signupPanel = document.getElementById("authSignupPanel");
+
+          // ---- UI helpers ----
+          function setLoggedInUI(username){
+            if(profileLink){
+              profileLink.textContent = `My Profile (${username})`;
+              profileLink.setAttribute("data-auth", "authed");
+            }
+            if(pdName) pdName.textContent = username;
+          }
+          function setLoggedOutUI(){
+            if(profileLink){
+              profileLink.textContent = "My Profile";
+              profileLink.setAttribute("data-auth", "gate");
+            }
+            hideDropdown();
+          }
+          function showModal(which="login"){
+            if(!modal) return;
+            modal.hidden = false;
+            switchTab(which);
+            if(which === "login") loginStatus.textContent = "";
+            else signupStatus.textContent = "";
+          }
+          function hideModal(){ if(modal) modal.hidden = true; }
+          function toggleDropdown(){ if(dropdown) dropdown.hidden = !dropdown.hidden; }
+          function hideDropdown(){ if(dropdown) dropdown.hidden = true; }
+          function switchTab(which){
+            tabs.forEach(t => {
+              const is = t.dataset.authTab === which;
+              t.classList.toggle("is-active", is);
+              t.setAttribute("aria-selected", String(is));
+            });
+            const isLogin = (which === "login");
+            loginPanel.classList.toggle("is-active", isLogin);
+            signupPanel.classList.toggle("is-active", !isLogin);
+            loginPanel.hidden = !isLogin;
+            signupPanel.hidden = isLogin;
+          }
+
+          // ---- Initial session ----
+          const current = getSession();
+          if(current){ setLoggedInUI(current); } else { setLoggedOutUI(); }
+
+          // ---- Events ----
+          profileLink?.addEventListener("click", (e) => {
+            e.preventDefault();
+            const state = profileLink.getAttribute("data-auth");
+            if(state === "gate"){ showModal("login"); }
+            else { toggleDropdown(); }
+          });
+
+          // Close dropdown when clicking outside
+          document.addEventListener("click", (e) => {
+            if(!dropdown || dropdown.hidden) return;
+            const within = dropdown.contains(e.target) || profileLink?.contains(e.target);
+            if(!within) hideDropdown();
+          });
+
+          // Modal close (backdrop or ×)
+          modal?.addEventListener("click", (e) => {
+            if(e.target.matches("[data-auth-close='true']")) hideModal();
+          });
+          document.addEventListener("keydown", (e) => {
+            if(e.key === "Escape" && modal && !modal.hidden) hideModal();
+          });
+
+          // Tabs
+          tabs.forEach(t => t.addEventListener("click", () => switchTab(t.dataset.authTab)));
+
+          // Login
+          loginForm?.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            loginStatus.textContent = "Checking…";
+            const fd = new FormData(loginForm);
+            try{
+              const username = await login(fd.get("username"), fd.get("password"));
+              loginStatus.textContent = "Success.";
+              setLoggedInUI(username);
+              hideModal();
+            }catch(err){
+              loginStatus.textContent = err?.message || "Login failed.";
+            }
+          });
+
+          // Signup
+          signupForm?.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            signupStatus.textContent = "Creating account…";
+            const fd = new FormData(signupForm);
+            const u = String(fd.get("username")||"");
+            const p = String(fd.get("password")||"");
+            const c = String(fd.get("confirm")||"");
+            if(p !== c){ signupStatus.textContent = "Passwords do not match."; return; }
+            if(!/^[a-z0-9_\. \-]{3,24}$/i.test(u)){ signupStatus.textContent = "Use 3–24 chars: letters, numbers, space, .-_"; return; }
+            try{
+              const username = await signup(u, p);
+              signupStatus.textContent = "Account created.";
+              setLoggedInUI(username);
+              hideModal();
+            }catch(err){
+              signupStatus.textContent = err?.message || "Sign-up failed.";
+            }
+          });
+
+          // Logout
+          logoutBtn?.addEventListener("click", () => {
+            logout();
+            setLoggedOutUI();
+          });
+
+          // Optional: clicking "My Profile" link inside dropdown (placeholder until page exists)
+          goProfile?.addEventListener("click", () => hideDropdown());
+        })();
+        </script>
     </script>
 </body>
 </html>
