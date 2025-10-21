@@ -78,6 +78,9 @@
         .auth-pd-link:hover, .auth-pd-btn:hover{ filter: brightness(1.05); }
     </style>
 
+    <!-- Supabase JS (CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 </head>
 <body class="bg-amber-50 font-sans">
     <!-- Navigation -->
@@ -417,7 +420,7 @@
         </div>
     </div>
 
-    <!-- Auth Modal (separate from your competition Signup Modal) -->
+    <!-- For Supabase -->
     <div id="authModal" class="auth-modal" hidden>
       <div class="auth-backdrop" data-auth-close="true"></div>
       <div class="auth-dialog" role="dialog" aria-modal="true" aria-labelledby="authTitle">
@@ -432,8 +435,8 @@
           <h2 id="authTitle">Welcome back</h2>
           <form id="authLoginForm" class="auth-form" autocomplete="on">
             <label>
-              Username
-              <input name="username" type="text" required autocomplete="username" />
+              Email
+              <input name="email" type="email" required autocomplete="email" />
             </label>
             <label>
               Password
@@ -448,8 +451,12 @@
           <h2>Create your account</h2>
           <form id="authSignupForm" class="auth-form" autocomplete="on">
             <label>
-              Username
-              <input name="username" type="text" minlength="3" maxlength="24" required autocomplete="username" />
+              Email
+              <input name="email" type="email" required autocomplete="email" />
+            </label>
+            <label>
+              Username (public)
+              <input name="username" type="text" minlength="3" maxlength="24" autocomplete="username" />
             </label>
             <label>
               Password
@@ -661,48 +668,16 @@
             });
         });
         <script>
-        /* ======= AUTH (profiles) — local-only demo auth with salted SHA-256 in localStorage ======= */
         (() => {
-          // ---- Storage & hashing ----
-          const USERS_KEY = "auth.users.v1";
-          const SESSION_KEY = "auth.session.user";
+          // ===== CONFIG: fill these with your Supabase project details =====
+          const SUPABASE_URL = "https://YOUR-PROJECT-REF.supabase.co";
+          const SUPABASE_ANON_KEY = "YOUR_ANON_PUBLIC_KEY";
 
-          const b64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
-          const enc = (s) => new TextEncoder().encode(s);
-          async function sha256(str){ const buf = await crypto.subtle.digest("SHA-256", enc(str)); return b64(buf); }
-          function getUsers(){ try { return JSON.parse(localStorage.getItem(USERS_KEY) || "{}"); } catch { return {}; } }
-          function setUsers(obj){ localStorage.setItem(USERS_KEY, JSON.stringify(obj)); }
-          function getSession(){ return localStorage.getItem(SESSION_KEY); }
-          function setSession(username){ localStorage.setItem(SESSION_KEY, username); }
-          function clearSession(){ localStorage.removeItem(SESSION_KEY); }
-          function randomSalt(len=16){ const a = new Uint8Array(len); crypto.getRandomValues(a); return btoa(String.fromCharCode(...a)); }
+          // ===== Init client =====
+          const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-          async function signup(username, password){
-            username = String(username||"").trim().toLowerCase();
-            if(!username || !password) throw new Error("Missing credentials.");
-            const users = getUsers();
-            if(users[username]) throw new Error("Username already exists.");
-            const salt = randomSalt();
-            const passwordHash = await sha256(salt + ":" + password);
-            users[username] = { salt, passwordHash, createdAt: Date.now() };
-            setUsers(users);
-            setSession(username);
-            return username;
-          }
-          async function login(username, password){
-            username = String(username||"").trim().toLowerCase();
-            const users = getUsers();
-            const rec = users[username];
-            if(!rec) throw new Error("Invalid username or password.");
-            const testHash = await sha256(rec.salt + ":" + password);
-            if(testHash !== rec.passwordHash) throw new Error("Invalid username or password.");
-            setSession(username);
-            return username;
-          }
-          function logout(){ clearSession(); }
-
-          // ---- Elements ----
-          const profileLink = document.getElementById("authProfileLink"); // nav item
+          // ===== Elements =====
+          const profileLink = document.getElementById("authProfileLink");
           const dropdown = document.getElementById("authProfileDropdown");
           const pdName = document.getElementById("authPdName");
           const goProfile = document.getElementById("authGoProfile");
@@ -717,18 +692,23 @@
           const loginPanel = document.getElementById("authLoginPanel");
           const signupPanel = document.getElementById("authSignupPanel");
 
-          // ---- UI helpers ----
-          function setLoggedInUI(username){
+          // ===== UI helpers =====
+          function labelFromUser(user){
+            const uname = user?.user_metadata?.username;
+            return uname && String(uname).trim() ? uname : (user?.email || "User");
+          }
+          function setLoggedInUI(user){
+            const label = labelFromUser(user);
             if(profileLink){
-              profileLink.textContent = `My Profile (${username})`;
-              profileLink.setAttribute("data-auth", "authed");
+              profileLink.textContent = `My Profile (${label})`;
+              profileLink.setAttribute("data-auth","authed");
             }
-            if(pdName) pdName.textContent = username;
+            if(pdName) pdName.textContent = label;
           }
           function setLoggedOutUI(){
             if(profileLink){
               profileLink.textContent = "My Profile";
-              profileLink.setAttribute("data-auth", "gate");
+              profileLink.setAttribute("data-auth","gate");
             }
             hideDropdown();
           }
@@ -748,23 +728,34 @@
               t.classList.toggle("is-active", is);
               t.setAttribute("aria-selected", String(is));
             });
-            const isLogin = (which === "login");
+            const isLogin = which === "login";
             loginPanel.classList.toggle("is-active", isLogin);
             signupPanel.classList.toggle("is-active", !isLogin);
             loginPanel.hidden = !isLogin;
             signupPanel.hidden = isLogin;
           }
 
-          // ---- Initial session ----
-          const current = getSession();
-          if(current){ setLoggedInUI(current); } else { setLoggedOutUI(); }
+          // ===== Session bootstrap =====
+          (async () => {
+            const { data } = await sb.auth.getSession();
+            if(data?.session?.user){
+              setLoggedInUI(data.session.user);
+            } else {
+              setLoggedOutUI();
+            }
+          })();
 
-          // ---- Events ----
+          // ===== Auth state listener =====
+          sb.auth.onAuthStateChange((_event, session) => {
+            if(session?.user){ setLoggedInUI(session.user); }
+            else { setLoggedOutUI(); }
+          });
+
+          // ===== Events =====
           profileLink?.addEventListener("click", (e) => {
             e.preventDefault();
             const state = profileLink.getAttribute("data-auth");
-            if(state === "gate"){ showModal("login"); }
-            else { toggleDropdown(); }
+            if(state === "gate"){ showModal("login"); } else { toggleDropdown(); }
           });
 
           // Close dropdown when clicking outside
@@ -785,44 +776,54 @@
           // Tabs
           tabs.forEach(t => t.addEventListener("click", () => switchTab(t.dataset.authTab)));
 
-          // Login
+          // ===== Login (email + password) =====
           loginForm?.addEventListener("submit", async (e) => {
             e.preventDefault();
             loginStatus.textContent = "Checking…";
             const fd = new FormData(loginForm);
+            const email = String(fd.get("email")||"").trim();
+            const password = String(fd.get("password")||"");
             try{
-              const username = await login(fd.get("username"), fd.get("password"));
+              const { error } = await sb.auth.signInWithPassword({ email, password });
+              if(error) throw error;
               loginStatus.textContent = "Success.";
-              setLoggedInUI(username);
               hideModal();
             }catch(err){
               loginStatus.textContent = err?.message || "Login failed.";
             }
           });
 
-          // Signup
+          // ===== Sign up (email + password, optional username in user_metadata) =====
           signupForm?.addEventListener("submit", async (e) => {
             e.preventDefault();
             signupStatus.textContent = "Creating account…";
             const fd = new FormData(signupForm);
-            const u = String(fd.get("username")||"");
-            const p = String(fd.get("password")||"");
-            const c = String(fd.get("confirm")||"");
-            if(p !== c){ signupStatus.textContent = "Passwords do not match."; return; }
-            if(!/^[a-z0-9_\. \-]{3,24}$/i.test(u)){ signupStatus.textContent = "Use 3–24 chars: letters, numbers, space, .-_"; return; }
+            const email = String(fd.get("email")||"").trim();
+            const username = String(fd.get("username")||"").trim();
+            const password = String(fd.get("password")||"");
+            const confirm = String(fd.get("confirm")||"");
+            if(password !== confirm){ signupStatus.textContent = "Passwords do not match."; return; }
+            if(username && !/^[a-z0-9_\. \-]{3,24}$/i.test(username)){ signupStatus.textContent = "Use 3–24 chars: letters, numbers, space, .-_"; return; }
             try{
-              const username = await signup(u, p);
-              signupStatus.textContent = "Account created.";
-              setLoggedInUI(username);
-              hideModal();
+              const { error } = await sb.auth.signUp({
+                email,
+                password,
+                options: {
+                  data: username ? { username } : {},
+                  emailRedirectTo: window.location.origin
+                }
+              });
+              if(error) throw error;
+              signupStatus.textContent = "Check your email to verify your account.";
+              // Keep modal open to show message; you can auto-close if you prefer.
             }catch(err){
               signupStatus.textContent = err?.message || "Sign-up failed.";
             }
           });
 
-          // Logout
-          logoutBtn?.addEventListener("click", () => {
-            logout();
+          // ===== Logout =====
+          logoutBtn?.addEventListener("click", async () => {
+            await sb.auth.signOut();
             setLoggedOutUI();
           });
 
