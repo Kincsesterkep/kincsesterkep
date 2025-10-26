@@ -676,43 +676,6 @@
         });
     </script>
     <script>
-    // Mobile-safe activator for "My Profile" (works on iOS/Android)
-    (() => {
-      const profileLink = document.getElementById("authProfileLink");
-      const dropdown = document.getElementById("authProfileDropdown");
-      const modal = document.getElementById("authModal");
-
-      if (!profileLink) return;
-    
-      // Accessibility + reliability on mobile
-      profileLink.setAttribute("role", "button");
-      profileLink.setAttribute("tabindex", "0");
-
-      function handleActivate(e){
-        // Allow keyboard (Enter/Space), block other keys
-        if (e.type === "keydown" && !(e.key === "Enter" || e.key === " ")) return;
-        // Prevent default anchor navigation to keep SPA feel
-        e.preventDefault();
-
-        const state = profileLink.getAttribute("data-auth"); // "gate" | "authed"
-
-        if (state === "gate") {
-          // Prefer your existing showModal("login") if available
-          try { if (typeof showModal === "function") { showModal("login"); return; } } catch {}
-          // Fallback: just reveal the modal (login is default panel)
-          if (modal) modal.hidden = false;
-        } else {
-          if (dropdown) dropdown.hidden = !dropdown.hidden;
-        }
-      }
-
-      // Bind multiple events for mobile browsers
-      ["click", "touchend", "pointerup", "keydown"].forEach(type => {
-        profileLink.addEventListener(type, handleActivate, { passive: false });
-      });
-    })();
-    </script>
-    <script>
         (() => {
           // ===== CONFIG: fill these with your Supabase project details =====
           const SUPABASE_URL = "https://nwdoflrxaxjutbhhceyw.supabase.co";
@@ -796,6 +759,37 @@
             else { setLoggedOutUI(); }
           });
 
+          // ===== Events (mobile-safe) =====
+          (() => {
+            const profileLink = document.getElementById("authProfileLink");
+            const dropdown = document.getElementById("authProfileDropdown");
+            const modal = document.getElementById("authModal");
+
+            if (!profileLink) return;
+
+            // Accessibility + reliability on mobile
+            profileLink.setAttribute("role", "button");
+            profileLink.setAttribute("tabindex", "0");
+
+            function handleActivate(e){
+              if (e.type === "keydown" && !(e.key === "Enter" || e.key === " ")) return;
+              e.preventDefault();
+
+              const state = profileLink.getAttribute("data-auth"); // "gate" | "authed"
+
+              if (state === "gate") {
+                try { if (typeof showModal === "function") { showModal("login"); return; } } catch {}
+                if (modal) modal.hidden = false;
+              } else {
+                if (dropdown) dropdown.hidden = !dropdown.hidden;
+              }
+            }
+
+            ["click", "touchend", "pointerup", "keydown"].forEach(type => {
+              profileLink.addEventListener(type, handleActivate, { passive: false });
+            });
+          })();
+
           // Close dropdown when clicking outside
           document.addEventListener("click", (e) => {
             if(!dropdown || dropdown.hidden) return;
@@ -871,3 +865,4 @@
     </script>
 </body>
 </html>
+
