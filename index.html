@@ -82,18 +82,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-      /* Mobile tap/click reliability + layering */
-      #authProfileLink { position: relative; z-index: 5; pointer-events: auto; }
-      .auth-modal{ z-index: 1000; }
-      .auth-profile-dropdown{ z-index: 1001; }
-    </style>
-
-    <style>
-      /* Ensure the "My Profile" link receives taps above any mobile overlays */
-      #authProfileLink {
+      /* Ensure the "My Profile" link reliably receives taps on mobile */
+      #authProfileLink,
+      #authProfileLinkMobile {
         position: relative;
-        z-index: 9999 !important;
-        pointer-events: auto !important;
+        z-index: 9999;
+        pointer-events: auto;
         -webkit-tap-highlight-color: transparent;
         touch-action: manipulation;
       }
@@ -120,7 +114,7 @@
         </div>
         <!-- Mobile menu -->
         <div class="md:hidden hidden bg-amber-800 px-4 py-2" id="mobile-menu">
-            <a href="#my profile" class="block py-2 hover:text-amber-200">My Profile</a>
+            <a id="authProfileLinkMobile" href="#" class="block py-2 hover:text-amber-200">My Profile</a>
             <a href="#competitions" class="block py-2 hover:text-amber-200">Competitions</a>
             <a href="#about" class="block py-2 hover:text-amber-200">About</a>
             <a href="#faq" class="block py-2 hover:text-amber-200">FAQ</a>
@@ -770,36 +764,12 @@
             else { setLoggedOutUI(); }
           });
 
-          // ===== Events (mobile-safe) =====
-          (() => {
-            const link   = document.getElementById("authProfileLink");
-            const modal  = document.getElementById("authModal");
-            const menu   = document.getElementById("authProfileDropdown");
-
-            if (!profileLink) return;
-
-            // Accessibility + reliability on mobile
-            profileLink.setAttribute("role", "button");
-            profileLink.setAttribute("tabindex", "0");
-
-            function handleActivate(e){
-              if (e.type === "keydown" && !(e.key === "Enter" || e.key === " ")) return;
-              e.preventDefault();
-
-              const state = profileLink.getAttribute("data-auth"); // "gate" | "authed"
-
-              if (state === "gate") {
-                try { if (typeof showModal === "function") { showModal("login"); return; } } catch {}
-                if (modal) modal.hidden = false;
-              } else {
-                if (dropdown) dropdown.hidden = !dropdown.hidden;
-              }
-            }
-
-            ["click", "touchend", "pointerup", "keydown"].forEach(type => {
-              profileLink.addEventListener(type, handleActivate, { passive: false });
-            });
-          })();
+          // ===== Events =====
+          profileLink?.addEventListener("click", (e) => {
+            e.preventDefault();
+            const state = profileLink.getAttribute("data-auth");
+            if(state === "gate"){ showModal("login"); } else { toggleDropdown(); }
+          });
 
           // Close dropdown when clicking outside
           document.addEventListener("click", (e) => {
@@ -872,6 +842,49 @@
 
           // Optional: clicking "My Profile" link inside dropdown (placeholder until page exists)
           goProfile?.addEventListener("click", () => hideDropdown());
+        })();
+
+        (() => {
+          const desktopLink = document.getElementById("authProfileLink");        // top nav
+          const mobileLink  = document.getElementById("authProfileLinkMobile");   // mobile menu item
+          const modal       = document.getElementById("authModal");
+          const dropdown    = document.getElementById("authProfileDropdown");
+
+          if (!desktopLink && !mobileLink) return;
+
+          function openAuthModal(){
+            try { if (typeof showModal === "function") { showModal("login"); return; } } catch {}
+            if (modal) modal.hidden = false;
+          }
+
+          function toggleMenu(){ if (dropdown) dropdown.hidden = !dropdown.hidden; }
+
+          function activate(e){
+            if (e.type === "keydown" && !(e.key === "Enter" || e.key === " ")) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const state = (desktopLink || e.currentTarget).getAttribute("data-auth") || "gate"; // "gate" | "authed"
+            if (state === "gate") openAuthModal(); else toggleMenu();
+          }
+
+          const opts = { capture: true, passive: false };
+          [desktopLink, mobileLink].forEach(link => {
+            if (!link) return;
+            link.setAttribute("role", "button");
+            link.setAttribute("tabindex", "0");
+            link.addEventListener("touchstart", activate, opts);
+            link.addEventListener("touchend",   activate, opts);
+            link.addEventListener("pointerup",  activate, opts);
+            link.addEventListener("click",      activate, opts);
+            link.addEventListener("keydown",    activate, opts);
+          });
+
+          // Close dropdown when tapping outside
+          document.addEventListener("click", (e) => {
+            if(!dropdown || dropdown.hidden) return;
+            if (dropdown.contains(e.target) || (desktopLink && desktopLink.contains(e.target))) return;
+            dropdown.hidden = true;
+          }, opts);
         })();
     </script>
 </body>
