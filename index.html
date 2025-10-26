@@ -81,10 +81,12 @@
     <!-- Supabase JS (CDN) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- Mobile tap/click reliability -->
-    #authProfileLink { position: relative; z-index: 5; pointer-events: auto; }
-    .auth-modal{ z-index: 1000; }
-    .auth-profile-dropdown{ z-index: 1001; }
+    <style>
+      /* Mobile tap/click reliability + layering */
+      #authProfileLink { position: relative; z-index: 5; pointer-events: auto; }
+      .auth-modal{ z-index: 1000; }
+      .auth-profile-dropdown{ z-index: 1001; }
+    </style>
 
 </head>
 <body class="bg-amber-50 font-sans">
