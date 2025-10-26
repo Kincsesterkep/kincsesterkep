@@ -88,6 +88,17 @@
       .auth-profile-dropdown{ z-index: 1001; }
     </style>
 
+    <style>
+      /* Ensure the "My Profile" link receives taps above any mobile overlays */
+      #authProfileLink {
+        position: relative;
+        z-index: 9999 !important;
+        pointer-events: auto !important;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+      }
+    </style>
+
 </head>
 <body class="bg-amber-50 font-sans">
     <!-- Navigation -->
@@ -761,9 +772,9 @@
 
           // ===== Events (mobile-safe) =====
           (() => {
-            const profileLink = document.getElementById("authProfileLink");
-            const dropdown = document.getElementById("authProfileDropdown");
-            const modal = document.getElementById("authModal");
+            const link   = document.getElementById("authProfileLink");
+            const modal  = document.getElementById("authModal");
+            const menu   = document.getElementById("authProfileDropdown");
 
             if (!profileLink) return;
 
