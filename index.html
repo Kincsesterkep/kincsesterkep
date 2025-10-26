@@ -463,6 +463,7 @@
               <input name="password" type="password" required autocomplete="current-password" />
             </label>
             <button type="submit" class="btn primary">Log in</button>
+            <button id="authForgot" type="button" class="btn" style="margin-top:8px;">Forgot password?</button>
             <p class="auth-status" id="authLoginStatus"></p>
           </form>
         </section>
@@ -488,6 +489,48 @@
             </label>
             <button type="submit" class="btn primary">Sign up</button>
             <p class="auth-status" id="authSignupStatus"></p>
+          </form>
+        </section>
+      </div>
+    </div>
+
+    <!-- Request password reset (enter email) -->
+    <div id="authResetModal" class="auth-modal" hidden>
+      <div class="auth-backdrop" data-auth-close="true"></div>
+      <div class="auth-dialog" role="dialog" aria-modal="true" aria-labelledby="authResetTitle">
+        <button class="auth-close" aria-label="Close" data-auth-close="true">×</button>
+        <section class="auth-panel is-active" id="authResetPanel" role="tabpanel">
+          <h2 id="authResetTitle">Reset your password</h2>
+          <form id="authResetForm" class="auth-form" autocomplete="on">
+            <label>
+              Email
+              <input name="email" type="email" required autocomplete="email" />
+            </label>
+            <button type="submit" class="btn primary">Send reset link</button>
+            <p class="auth-status" id="authResetStatus"></p>
+          </form>
+        </section>
+      </div>
+    </div>
+
+    <!-- Set new password (after Supabase recovery link) -->
+    <div id="authNewPwdModal" class="auth-modal" hidden>
+      <div class="auth-backdrop" data-auth-close="true"></div>
+      <div class="auth-dialog" role="dialog" aria-modal="true" aria-labelledby="authNewPwdTitle">
+        <button class="auth-close" aria-label="Close" data-auth-close="true">×</button>
+        <section class="auth-panel is-active" id="authNewPwdPanel" role="tabpanel">
+          <h2 id="authNewPwdTitle">Set a new password</h2>
+          <form id="authNewPwdForm" class="auth-form" autocomplete="on">
+            <label>
+              New password
+              <input name="password" type="password" minlength="6" required autocomplete="new-password" />
+            </label>
+            <label>
+              Confirm new password
+              <input name="confirm" type="password" minlength="6" required autocomplete="new-password" />
+            </label>
+            <button type="submit" class="btn primary">Update password</button>
+            <p class="auth-status" id="authNewPwdStatus"></p>
           </form>
         </section>
       </div>
@@ -718,6 +761,16 @@
           const loginPanel = document.getElementById("authLoginPanel");
           const signupPanel = document.getElementById("authSignupPanel");
 
+          // Forgot / reset / new password elements
+          const forgotBtn       = document.getElementById("authForgot");
+          const resetModal      = document.getElementById("authResetModal");
+          const resetForm       = document.getElementById("authResetForm");
+          const resetStatus     = document.getElementById("authResetStatus");
+
+          const newPwdModal     = document.getElementById("authNewPwdModal");
+          const newPwdForm      = document.getElementById("authNewPwdForm");
+          const newPwdStatus    = document.getElementById("authNewPwdStatus");
+
           // ===== UI helpers =====
           function labelFromUser(user){
             const uname = user?.user_metadata?.username;
@@ -775,6 +828,11 @@
             signupPanel.hidden = isLogin;
           }
 
+          function showResetModal(){ if(resetModal) resetModal.hidden = false; }
+          function hideResetModal(){ if(resetModal) resetModal.hidden = true; }
+          function showNewPwdModal(){ if(newPwdModal) newPwdModal.hidden = false; }
+          function hideNewPwdModal(){ if(newPwdModal) newPwdModal.hidden = true; }
+
           // ===== Session bootstrap =====
           (async () => {
             const { data } = await sb.auth.getSession();
@@ -786,7 +844,13 @@
           })();
 
           // ===== Auth state listener =====
-          sb.auth.onAuthStateChange((_event, session) => {
+          sb.auth.onAuthStateChange((event, session) => {
+            if (event === "PASSWORD_RECOVERY") {
+              // User arrived from email reset link — let them set a new password
+              try { hideModal(); hideResetModal(); } catch {}
+              showNewPwdModal();
+              return;
+            }
             if(session?.user){ setLoggedInUI(session.user); }
             else { setLoggedOutUI(); }
           });
@@ -796,6 +860,60 @@
             e.preventDefault();
             const state = profileLink.getAttribute("data-auth");
             if(state === "gate"){ showModal("login"); } else { toggleDropdown(); }
+          });
+
+          // Open "Reset password" (email entry) from Login
+          forgotBtn?.addEventListener("click", () => {
+            hideModal();      // close login modal if open
+            showResetModal(); // open reset modal
+          });
+
+          // Close reset modal via backdrop/×
+          resetModal?.addEventListener("click", (e) => {
+            if(e.target.matches("[data-auth-close='true']")) hideResetModal();
+          });
+          // Close new-password modal via backdrop/×
+          newPwdModal?.addEventListener("click", (e) => {
+            if(e.target.matches("[data-auth-close='true']")) hideNewPwdModal();
+          });
+
+          // Send password reset email
+          resetForm?.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            resetStatus.textContent = "Sending reset link…";
+            const fd = new FormData(resetForm);
+            const email = String(fd.get("email")||"").trim();
+            try{
+              const { error } = await sb.auth.resetPasswordForEmail(email, {
+                redirectTo: window.location.origin // user returns here from the email link
+              });
+              if(error) throw error;
+              resetStatus.textContent = "Check your email for a reset link.";
+            }catch(err){
+              resetStatus.textContent = err?.message || "Failed to send reset link.";
+            }
+          });
+
+          newPwdForm?.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            newPwdStatus.textContent = "Updating password…";
+            const fd = new FormData(newPwdForm);
+            const p = String(fd.get("password")||"");
+            const c = String(fd.get("confirm")||"");
+            if(p !== c){ newPwdStatus.textContent = "Passwords do not match."; return; }
+            try{
+              const { error } = await sb.auth.updateUser({ password: p });
+              if(error) throw error;
+
+              // refresh session + UI so "My Profile" shows the logged-in state
+              const { data: sess } = await sb.auth.getSession();
+              if (sess?.session?.user) { setLoggedInUI(sess.session.user); }
+
+              newPwdStatus.textContent = "Password updated. You are now signed in.";
+              setTimeout(() => { hideNewPwdModal(); }, 800);
+            }catch(err){
+              newPwdStatus.textContent = err?.message || "Failed to update password.";
+            }
           });
 
           // Close dropdown when clicking outside
