@@ -23,7 +23,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .parallax-bg {
-            background-attachment: fixed;
+            background-attachment: scroll;
             background-position: center;
             background-repeat: no-repeat;
             background-size: cover;
@@ -93,8 +93,16 @@
       }
     </style>
 
+    <style>
+      html, body {
+        max-width: 100%;
+        overflow-x: hidden;
+      }
+      *, *::before, *::after { box-sizing: border-box; }
+    </style>
+
 </head>
-<body class="bg-amber-50 font-sans">
+<body class="bg-amber-50 font-sans overflow-x-hidden">
     <!-- Navigation -->
     <nav class="bg-amber-900 text-amber-50 shadow-lg sticky top-0 z-50">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
