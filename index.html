@@ -702,25 +702,25 @@
 
         // Smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
+          if (anchor.id === "authProfileLink" || anchor.id === "authProfileLinkMobile") return;
+          if (anchor.getAttribute('href') === "#") return;
 
-                const targetId = this.getAttribute('href');
-                const targetElement = document.querySelector(targetId);
+          anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+            if (!targetElement) return;
 
-                if (targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 80,
-                        behavior: 'smooth'
-                    });
-
-                    // Close mobile menu if open
-                    const mobileMenu = document.getElementById('mobile-menu');
-                    if (!mobileMenu.classList.contains('hidden')) {
-                        mobileMenu.classList.add('hidden');
-                    }
-                }
+            window.scrollTo({
+              top: targetElement.offsetTop - 80,
+              behavior: 'smooth'
             });
+
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+              mobileMenu.classList.add('hidden');
+            }
+          });
         });
     </script>
     <script>
@@ -823,19 +823,16 @@
             else { setLoggedOutUI(); }
           });
 
-          // ===== Events =====
-          profileLink?.addEventListener("click", (e) => {
-            e.preventDefault();
-            const state = profileLink.getAttribute("data-auth");
-            if(state === "gate"){ showModal("login"); } else { toggleDropdown(); }
-          });
-
-          // Close dropdown when clicking outside
+          // Close dropdown when clicking/tapping outside (capture to beat other handlers)
           document.addEventListener("click", (e) => {
-            if(!dropdown || dropdown.hidden) return;
-            const within = dropdown.contains(e.target) || profileLink?.contains(e.target);
-            if(!within) hideDropdown();
-          });
+            if (!dropdown || dropdown.hidden) return;
+            const desktopLink = document.getElementById("authProfileLink");
+            const mobileLink  = document.getElementById("authProfileLinkMobile");
+            const within = dropdown.contains(e.target)
+                       || (desktopLink && desktopLink.contains(e.target))
+                       || (mobileLink  && mobileLink.contains(e.target));
+            if (!within) hideDropdown();
+          }, { capture: true });
 
           // Modal close (backdrop or ×)
           modal?.addEventListener("click", (e) => {
@@ -847,6 +844,53 @@
 
           // Tabs
           tabs.forEach(t => t.addEventListener("click", () => switchTab(t.dataset.authTab)));
+
+          // Unified desktop+mobile handler for "My Profile" (desktop & mobile)
+          (() => {
+            const desktopLink = document.getElementById("authProfileLink");
+            const mobileLink  = document.getElementById("authProfileLinkMobile");
+            if (!desktopLink && !mobileLink) return;
+
+            function openAuthModal(){
+              try { if (typeof showModal === "function") { showModal("login"); return; } } catch {}
+              if (modal) {
+                modal.hidden = false;
+                const loginPanel  = document.getElementById("authLoginPanel");
+                const signupPanel = document.getElementById("authSignupPanel");
+                if (loginPanel && signupPanel) {
+                  loginPanel.hidden = false;  loginPanel.classList.add("is-active");
+                  signupPanel.hidden = true;  signupPanel.classList.remove("is-active");
+                }
+              }
+            }
+
+            function toggleMenu(){ if (dropdown) dropdown.hidden = !dropdown.hidden; }
+
+            function activateFactory(link){
+              return function activate(e){
+                if (e.type === "keydown" && !(e.key === "Enter" || e.key === " ")) return;
+                e.preventDefault();
+                e.stopPropagation();
+                if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+                const state = link.getAttribute("data-auth") || "gate"; // "gate" | "authed"
+                if (state === "gate") openAuthModal(); else toggleMenu();
+              };
+            }
+
+            const opts = { capture: true, passive: false };
+            [desktopLink, mobileLink].forEach(link => {
+              if (!link) return;
+              link.setAttribute("role", "button");
+              link.setAttribute("tabindex", "0");
+              const handler = activateFactory(link);
+              link.addEventListener("pointerdown", handler, opts);
+              link.addEventListener("pointerup",   handler, opts);
+              link.addEventListener("click",       handler, opts);
+              link.addEventListener("keydown",     handler, opts);
+              link.addEventListener("touchstart",  handler, opts);
+              link.addEventListener("touchend",    handler, opts);
+            });
+          })();
 
           // ===== Login (email + password) =====
           loginForm?.addEventListener("submit", async (e) => {
@@ -983,49 +1027,7 @@
             }
           });
         })();
-
-        (() => {
-          const desktopLink = document.getElementById("authProfileLink");        // top nav
-          const mobileLink  = document.getElementById("authProfileLinkMobile");   // mobile menu item
-          const modal       = document.getElementById("authModal");
-          const dropdown    = document.getElementById("authProfileDropdown");
-
-          if (!desktopLink && !mobileLink) return;
-
-          function openAuthModal(){
-            try { if (typeof showModal === "function") { showModal("login"); return; } } catch {}
-            if (modal) modal.hidden = false;
-          }
-
-          function toggleMenu(){ if (dropdown) dropdown.hidden = !dropdown.hidden; }
-
-          function activate(e){
-            if (e.type === "keydown" && !(e.key === "Enter" || e.key === " ")) return;
-            e.preventDefault();
-            e.stopPropagation();
-            const state = (desktopLink || e.currentTarget).getAttribute("data-auth") || "gate"; // "gate" | "authed"
-            if (state === "gate") openAuthModal(); else toggleMenu();
-          }
-
-          const opts = { capture: true, passive: false };
-          [desktopLink, mobileLink].forEach(link => {
-            if (!link) return;
-            link.setAttribute("role", "button");
-            link.setAttribute("tabindex", "0");
-            link.addEventListener("touchstart", activate, opts);
-            link.addEventListener("touchend",   activate, opts);
-            link.addEventListener("pointerup",  activate, opts);
-            link.addEventListener("click",      activate, opts);
-            link.addEventListener("keydown",    activate, opts);
-          });
-
-          // Close dropdown when tapping outside
-          document.addEventListener("click", (e) => {
-            if(!dropdown || dropdown.hidden) return;
-            if (dropdown.contains(e.target) || (desktopLink && desktopLink.contains(e.target))) return;
-            dropdown.hidden = true;
-          }, opts);
-        })();
+        document.addEventListener
     </script>
 </body>
 </html>
