@@ -659,25 +659,26 @@
 
         // Smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
+          // Skip auth/profile triggers and naked "#" links
+          if (anchor.id === "authProfileLink" || anchor.id === "authProfileLinkMobile") return;
+          if (anchor.getAttribute('href') === "#") return;
 
-                const targetId = this.getAttribute('href');
-                const targetElement = document.querySelector(targetId);
+          anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+            if (!targetElement) return;
 
-                if (targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 80,
-                        behavior: 'smooth'
-                    });
-
-                    // Close mobile menu if open
-                    const mobileMenu = document.getElementById('mobile-menu');
-                    if (!mobileMenu.classList.contains('hidden')) {
-                        mobileMenu.classList.add('hidden');
-                    }
-                }
+            window.scrollTo({
+              top: targetElement.offsetTop - 80,
+              behavior: 'smooth'
             });
+
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+              mobileMenu.classList.add('hidden');
+            }
+          });
         });
     </script>
     <script>
@@ -716,6 +717,12 @@
               profileLink.textContent = `My Profile (${label})`;
               profileLink.setAttribute("data-auth","authed");
             }
+            const mobileLink = document.getElementById("authProfileLinkMobile");
+            if (mobileLink) {
+              mobileLink.textContent = `My Profile (${label})`;
+              mobileLink.setAttribute("data-auth","authed");
+            }
+
             if(pdName) pdName.textContent = label;
           }
           function setLoggedOutUI(){
@@ -723,6 +730,12 @@
               profileLink.textContent = "My Profile";
               profileLink.setAttribute("data-auth","gate");
             }
+            const mobileLink = document.getElementById("authProfileLinkMobile");
+            if (mobileLink) {
+              mobileLink.textContent = "My Profile";
+              mobileLink.setAttribute("data-auth","gate");
+            }
+
             hideDropdown();
           }
           function showModal(which="login"){
@@ -732,6 +745,8 @@
             if(which === "login") loginStatus.textContent = "";
             else signupStatus.textContent = "";
           }
+          window.__authShowModal = showModal;
+
           function hideModal(){ if(modal) modal.hidden = true; }
           function toggleDropdown(){ if(dropdown) dropdown.hidden = !dropdown.hidden; }
           function hideDropdown(){ if(dropdown) dropdown.hidden = true; }
@@ -853,7 +868,10 @@
           if (!desktopLink && !mobileLink) return;
 
           function openAuthModal(){
-            try { if (typeof showModal === "function") { showModal("login"); return; } } catch {}
+            if (typeof window.__authShowModal === "function") {
+              window.__authShowModal("login");
+              return;
+            }
             if (modal) modal.hidden = false;
           }
 
