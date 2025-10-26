@@ -658,12 +658,16 @@
         });
 
         // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        document.querySelectorAll('a[href^="#"]:not(#authProfileLink):not(#authProfileLinkMobile):not([href="#"])')
+          .forEach(anchor => {
           // Skip auth/profile triggers and naked "#" links
           if (anchor.id === "authProfileLink" || anchor.id === "authProfileLinkMobile") return;
           if (anchor.getAttribute('href') === "#") return;
 
           anchor.addEventListener('click', function(e) {
+            if (this.id === "authProfileLink" || this.id === "authProfileLinkMobile") return;
+            if (this.getAttribute('href') === "#") return;
+
             e.preventDefault();
             const targetId = this.getAttribute('href');
             const targetElement = document.querySelector(targetId);
