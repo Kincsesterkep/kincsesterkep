@@ -677,8 +677,12 @@
         const closeSuccessModal = document.getElementById('close-success-modal');
         const signupForm = document.getElementById('signup-form');
 
-
-          });
+        // Ensure X button always closes the Sign-Up modal
+        closeModal.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (signupModal) signupModal.classList.add('hidden');
+          document.body.style.overflow = 'auto';
         });
 
         function openSignupModalAndPrefill(name) {
@@ -730,6 +734,11 @@
                 document.body.style.overflow = 'auto';
             }
         });
+
+        window.closeAllModals = () => {
+          document.querySelectorAll('.fixed.inset-0').forEach(m => m.classList.add('hidden'));
+          document.body.style.overflow = 'auto';
+        };
 
         // Smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]:not(#authProfileLink):not(#authProfileLinkMobile):not([href="#"])')
@@ -790,6 +799,7 @@
 
           // Open the Sign Up modal and optionally preselect a competition
           function openSignupModal(pickedName){
+            window.closeAllModals?.();
             if (pickedName && competitionSelectEl) {
               // set the <select> if there's a matching option
               const opt = Array.from(competitionSelectEl.options).find(o => o.value === pickedName);
@@ -850,6 +860,7 @@
             hideDropdown();
           }
           function showModal(which="login"){
+            window.closeAllModals?.();
             if(!modal) return;
             modal.hidden = false;
             switchTab(which);
