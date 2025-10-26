@@ -130,11 +130,11 @@
               <form id="passwordForm" class="set-form">
                 <label>
                   New password
-                  <input name="password" type="password" minlength="6" placeholder="Minimum 6 characters" />
+                  <input name="password" type="password" minlength="8" placeholder="Minimum 8 characters" />
                 </label>
                 <label>
                   Confirm new password
-                  <input name="confirm" type="password" minlength="6" />
+                  <input name="confirm" type="password" minlength="8" />
                 </label>
                 <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-4 py-2 rounded-md">
                   Update password
@@ -148,7 +148,7 @@
         <!-- My Competitions -->
         <div class="card p-5" data-panel="mycomps" hidden>
           <h2 class="text-2xl font-bold mb-2">My Competitions</h2>
-          <p class="text-gray-600 mb-4">Only competitions you’ve **paid for** will appear here.</p>
+          <p class="text-gray-600 mb-4">Only competitions you’ve signed up for will appear here.</p>
 
           <div id="compsEmpty" class="text-gray-500">
             You have no paid competitions yet.
@@ -277,7 +277,7 @@
       const p = String(fd.get('password')||'');
       const c = String(fd.get('confirm')||'');
 
-      if(p.length < 6){ passwordStatus.textContent = "Password must be at least 6 characters."; return; }
+      if(p.length < 8){ passwordStatus.textContent = "Password must be at least 8 characters."; return; }
       if(p !== c){ passwordStatus.textContent = "Passwords do not match."; return; }
 
       try{
