@@ -1,814 +1,892 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Treasure Hunt Championships</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    .competition-card { transition: all 0.3s ease; transform-style: preserve-3d; }
-    .competition-card:hover { transform: translateY(-5px) rotateX(5deg); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); }
-    .clue-reveal { animation: fadeIn 0.5s ease-in-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .parallax-bg { background-attachment: fixed; background-position: center; background-repeat: no-repeat; background-size: cover; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treasure Hunt Championships</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .competition-card {
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+        .competition-card:hover {
+            transform: translateY(-5px) rotateX(5deg);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+        .clue-reveal {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .parallax-bg {
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+    </style>
+    <style>
+        /* === Auth (profile) styles — namespaced with auth- to avoid collisions === */
+        .auth-modal[hidden]{ display:none; }
+        .auth-modal{ position: fixed; inset:0; z-index: 1000; }
+        .auth-backdrop{ position:absolute; inset:0; background: rgba(0,0,0,0.55); backdrop-filter: blur(3px); }
+        .auth-dialog{
+          position: relative; margin: 6vh auto 0; width: min(92vw, 440px);
+          background: var(--surface, #121624); color: var(--text, #e8eaf6);
+          border: 1px solid var(--border, #2a2f45); border-radius: 16px; padding: 18px;
+          box-shadow: 0 25px 80px rgba(0,0,0,0.45);
+        }
+        .auth-close{ position:absolute; top:8px; right:10px; border:0; background:transparent; color: var(--muted, #b7bfd6); font-size: 22px; line-height: 1; cursor: pointer; }
+        .auth-tabs{ display: grid; grid-auto-flow: column; gap: 8px; margin-bottom: 12px; }
+        .auth-tab{
+          border:1px solid var(--border, #2a2f45); background: #0e1222; color: var(--muted, #b7bfd6);
+          padding: 8px 10px; border-radius: 999px; cursor: pointer;
+        }
+        .auth-tab.is-active{ background: var(--card, #161b33); color: var(--text, #e8eaf6); }
+        .auth-panel[hidden]{ display:none; }
+        .auth-panel.is-active{ display:block; }
+        .auth-form{ display:grid; gap: 10px; }
+        .auth-form label{ display:grid; gap:6px; font-weight:600; }
+        .auth-form input{
+          background:#0c1022; color: var(--text, #e8eaf6);
+          border:1px solid var(--border, #2a2f45); border-radius: 10px; padding:10px 12px;
+        }
+        .auth-status{ min-height: 1.4em; font-size: 0.95em; color: var(--muted, #b7bfd6); }
 
-  <style>
-    /* === Auth (profile) styles — namespaced with auth- to avoid collisions === */
-    .auth-modal[hidden]{ display:none; }
-    .auth-modal{ position: fixed; inset:0; z-index: 1000; }
-    .auth-backdrop{ position:absolute; inset:0; background: rgba(0,0,0,0.55); backdrop-filter: blur(3px); }
-    .auth-dialog{
-      position: relative; margin: 6vh auto 0; width: min(92vw, 440px);
-      background: var(--surface, #121624); color: var(--text, #e8eaf6);
-      border: 1px solid var(--border, #2a2f45); border-radius: 16px; padding: 18px;
-      box-shadow: 0 25px 80px rgba(0,0,0,0.45);
-    }
-    .auth-close{ position:absolute; top:8px; right:10px; border:0; background:transparent; color: var(--muted, #b7bfd6); font-size: 22px; line-height: 1; cursor: pointer; }
-    .auth-tabs{ display: grid; grid-auto-flow: column; gap: 8px; margin-bottom: 12px; }
-    .auth-tab{
-      border:1px solid var(--border, #2a2f45); background: #0e1222; color: var(--muted, #b7bfd6);
-      padding: 8px 10px; border-radius: 999px; cursor: pointer;
-    }
-    .auth-tab.is-active{ background: var(--card, #161b33); color: var(--text, #e8eaf6); }
-    .auth-panel[hidden]{ display:none; }
-    .auth-panel.is-active{ display:block; }
-    .auth-form{ display:grid; gap: 10px; }
-    .auth-form label{ display:grid; gap:6px; font-weight:600; }
-    .auth-form input{
-      background:#0c1022; color: var(--text, #e8eaf6);
-      border:1px solid var(--border, #2a2f45); border-radius: 10px; padding:10px 12px;
-    }
-    .auth-status{ min-height: 1.4em; font-size: 0.95em; color: var(--muted, #b7bfd6); }
+        .auth-profile-dropdown[hidden]{ display:none; }
+        .auth-profile-dropdown{
+          position: absolute;
+          right: 20px; top: 58px; z-index: 1001;
+          width: 260px; padding: 12px;
+          border:1px solid var(--border, #2a2f45); border-radius: 14px;
+          background: var(--card, #161b33); box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+        }
+        .auth-profile-summary{ display:flex; align-items:center; gap:10px; padding: 6px 4px 12px; border-bottom:1px solid var(--border, #2a2f45); }
+        .auth-avatar{ width:36px; height:36px; display:grid; place-items:center; border-radius: 50%; background:#0c1022; }
+        .auth-who{ display:grid; line-height:1.2; color: var(--muted, #b7bfd6); }
+        .auth-who strong{ color: var(--text, #e8eaf6); }
+        .auth-profile-actions{ display:grid; gap:8px; padding-top:10px; }
+        .auth-pd-link, .auth-pd-btn{
+          display:block; width:100%; text-align:left; text-decoration:none;
+          border:1px solid var(--border, #2a2f45); background:#0e1222; color: var(--text, #e8eaf6);
+          padding:10px 12px; border-radius: 10px; cursor:pointer;
+        }
+        .auth-pd-link:hover, .auth-pd-btn:hover{ filter: brightness(1.05); }
+    </style>
 
-    .auth-profile-dropdown[hidden]{ display:none; }
-    .auth-profile-dropdown{
-      position: absolute; right: 20px; top: 58px; z-index: 1001;
-      width: 260px; padding: 12px;
-      border:1px solid var(--border, #2a2f45); border-radius: 14px;
-      background: var(--card, #161b33); box-shadow: 0 20px 60px rgba(0,0,0,0.45);
-    }
-    .auth-profile-summary{ display:flex; align-items:center; gap:10px; padding: 6px 4px 12px; border-bottom:1px solid var(--border, #2a2f45); }
-    .auth-avatar{ width:36px; height:36px; display:grid; place-items:center; border-radius: 50%; background:#0c1022; }
-    .auth-who{ display:grid; line-height:1.2; color: var(--muted, #b7bfd6); }
-    .auth-who strong{ color: var(--text, #e8eaf6); }
-    .auth-profile-actions{ display:grid; gap:8px; padding-top:10px; }
-    .auth-pd-link, .auth-pd-btn{
-      display:block; width:100%; text-align:left; text-decoration:none;
-      border:1px solid var(--border, #2a2f45); background:#0e1222; color: var(--text, #e8eaf6);
-      padding:10px 12px; border-radius: 10px; cursor:pointer;
-    }
-    .auth-pd-link:hover, .auth-pd-btn:hover{ filter: brightness(1.05); }
-  </style>
+    <!-- Supabase JS (CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Supabase JS (CDN) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+      /* Ensure the "My Profile" link reliably receives taps on mobile */
+      #authProfileLink,
+      #authProfileLinkMobile {
+        position: relative;
+        z-index: 9999;
+        pointer-events: auto;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+      }
+    </style>
 
-  <style>
-    /* Ensure the "My Profile" link reliably receives taps on mobile */
-    #authProfileLink, #authProfileLinkMobile {
-      position: relative; z-index: 9999; pointer-events: auto;
-      -webkit-tap-highlight-color: transparent; touch-action: manipulation;
-    }
-  </style>
 </head>
 <body class="bg-amber-50 font-sans">
-  <!-- Navigation -->
-  <nav class="bg-amber-900 text-amber-50 shadow-lg sticky top-0 z-50">
-    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-      <div class="flex items-center space-x-2">
-        <i class="fas fa-map-marked-alt text-2xl"></i>
-        <span class="text-xl font-bold">Kincsestérkép</span>
-      </div>
-      <div class="hidden md:flex space-x-6">
-        <a id="authProfileLink" href="#" data-auth="gate">My Profile</a>
-        <a href="#competitions" class="hover:text-amber-200 transition">Competitions</a>
-        <a href="#about" class="hover:text-amber-200 transition">About</a>
-        <a href="#faq" class="hover:text-amber-200 transition">FAQ</a>
-      </div>
-      <button class="md:hidden text-xl" id="mobile-menu-button">
-        <i class="fas fa-bars"></i>
-      </button>
-    </div>
-    <!-- Mobile menu -->
-    <div class="md:hidden hidden bg-amber-800 px-4 py-2" id="mobile-menu">
-      <a id="authProfileLinkMobile" href="#" class="block py-2 hover:text-amber-200">My Profile</a>
-      <a href="#competitions" class="block py-2 hover:text-amber-200">Competitions</a>
-      <a href="#about" class="block py-2 hover:text-amber-200">About</a>
-      <a href="#faq" class="block py-2 hover:text-amber-200">FAQ</a>
-    </div>
-  </nav>
-
-  <!-- Hero Section -->
-  <header class="parallax-bg bg-[url('https://images.unsplash.com/photo-1504851149312-7a075b496cc7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2068&q=80')] relative">
-    <div class="bg-black bg-opacity-60 py-32">
-      <div class="container mx-auto px-4 text-center">
-        <h1 class="text-4xl md:text-6xl font-bold text-amber-50 mb-6">Kincsvadászok Bajnoksága!</h1>
-        <p class="text-xl md:text-2xl text-amber-200 mb-8 max-w-3xl mx-auto">Vadássz nyomok után, oldj meg ősi rejtvényeket, és szerezd meg a nyereményed izgalmas kincsvadász versenyeink egyikében!</p>
-        <a href="#competitions" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-full text-lg transition duration-300 inline-block transform hover:scale-105">
-          Explore Challenges <i class="fas fa-arrow-down ml-2"></i>
-        </a>
-      </div>
-    </div>
-  </header>
-
-  <!-- Competitions Section -->
-  <section id="competitions" class="py-16 bg-amber-100">
-    <div class="container mx-auto px-4">
-      <h2 class="text-3xl md:text-4xl font-bold text-center text-amber-900 mb-12">Choose Your Adventure</h2>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <!-- Cards omitted for brevity; unchanged from your version -->
-        <!-- ... (keep your five competition cards exactly as-is) ... -->
-        <div class="competition-card bg-white rounded-xl overflow-hidden shadow-lg">
-          <div class="h-48 bg-[url('https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center"></div>
-          <div class="p-6">
-            <h3 class="text-2xl font-bold text-amber-800 mb-2">The Lost Pirate Gold</h3>
-            <p class="text-gray-600 mb-4">Follow the trail of Captain Blackbeard's hidden treasure through coastal towns and cryptic maps.</p>
-            <div class="mb-4">
-              <span class="inline-block bg-amber-200 text-amber-800 px-3 py-1 rounded-full text-sm font-semibold mr-2">Difficulty: Medium</span>
-              <span class="inline-block bg-blue-200 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">Duration: 3 days</span>
+    <!-- Navigation -->
+    <nav class="bg-amber-900 text-amber-50 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-map-marked-alt text-2xl"></i>
+                <span class="text-xl font-bold">Kincsestérkép</span>
             </div>
-            <button class="reveal-clue-btn bg-amber-600 hover:bg-amber-700 text-white py-2 px-4 rounded-lg transition w-full" data-clue="1">
-              Reveal First Clue <i class="fas fa-eye ml-2"></i>
+            <div class="hidden md:flex space-x-6">
+                <a id="authProfileLink" href="#" data-auth="gate">My Profile</a>
+                <a href="#competitions" class="hover:text-amber-200 transition">Competitions</a>
+                <a href="#about" class="hover:text-amber-200 transition">About</a>
+                <a href="#faq" class="hover:text-amber-200 transition">FAQ</a>
+            </div>
+            <button class="md:hidden text-xl" id="mobile-menu-button">
+                <i class="fas fa-bars"></i>
             </button>
-            <div id="clue-1" class="clue-reveal mt-4 hidden p-4 bg-amber-50 rounded-lg border border-amber-200">
-              <h4 class="font-bold text-amber-800 mb-2">First Clue:</h4>
-              <p>"Where waves crash against ancient stones, seek the tavern where sailors once moaned. Look for the sign with a broken crown, your next clue lies somewhere down."</p>
+        </div>
+        <!-- Mobile menu -->
+        <div class="md:hidden hidden bg-amber-800 px-4 py-2" id="mobile-menu">
+            <a id="authProfileLinkMobile" href="#" class="block py-2 hover:text-amber-200">My Profile</a>
+            <a href="#competitions" class="block py-2 hover:text-amber-200">Competitions</a>
+            <a href="#about" class="block py-2 hover:text-amber-200">About</a>
+            <a href="#faq" class="block py-2 hover:text-amber-200">FAQ</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="parallax-bg bg-[url('https://images.unsplash.com/photo-1504851149312-7a075b496cc7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2068&q=80')] relative">
+        <div class="bg-black bg-opacity-60 py-32">
+            <div class="container mx-auto px-4 text-center">
+                <h1 class="text-4xl md:text-6xl font-bold text-amber-50 mb-6">Kincsvadászok Bajnoksága!</h1>
+                <p class="text-xl md:text-2xl text-amber-200 mb-8 max-w-3xl mx-auto">Vadássz nyomok után, oldj meg ősi rejtvényeket, és szerezd meg a nyereményed izgalmas kincsvadász versenyeink egyikében!</p>
+                <a href="#competitions" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-8 rounded-full text-lg transition duration-300 inline-block transform hover:scale-105">
+                    Explore Challenges <i class="fas fa-arrow-down ml-2"></i>
+                </a>
             </div>
-            <button class="signup-btn mt-4 bg-amber-800 hover:bg-amber-900 text-white py-2 px-4 rounded-lg transition w-full">
-              Sign Up <i class="fas fa-sign-in-alt ml-2"></i>
+        </div>
+    </header>
+
+    <!-- Competitions Section -->
+    <section id="competitions" class="py-16 bg-amber-100">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-amber-900 mb-12">Choose Your Adventure</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Competition 1 -->
+                <div class="competition-card bg-white rounded-xl overflow-hidden shadow-lg">
+                    <div class="h-48 bg-[url('https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center"></div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold text-amber-800 mb-2">The Lost Pirate Gold</h3>
+                        <p class="text-gray-600 mb-4">Follow the trail of Captain Blackbeard's hidden treasure through coastal towns and cryptic maps.</p>
+                        <div class="mb-4">
+                            <span class="inline-block bg-amber-200 text-amber-800 px-3 py-1 rounded-full text-sm font-semibold mr-2">Difficulty: Medium</span>
+                            <span class="inline-block bg-blue-200 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">Duration: 3 days</span>
+                        </div>
+                        <button class="reveal-clue-btn bg-amber-600 hover:bg-amber-700 text-white py-2 px-4 rounded-lg transition w-full" data-clue="1">
+                            Reveal First Clue <i class="fas fa-eye ml-2"></i>
+                        </button>
+                        <div id="clue-1" class="clue-reveal mt-4 hidden p-4 bg-amber-50 rounded-lg border border-amber-200">
+                            <h4 class="font-bold text-amber-800 mb-2">First Clue:</h4>
+                            <p>"Where waves crash against ancient stones, seek the tavern where sailors once moaned. Look for the sign with a broken crown, your next clue lies somewhere down."</p>
+                        </div>
+                        <button class="signup-btn mt-4 bg-amber-800 hover:bg-amber-900 text-white py-2 px-4 rounded-lg transition w-full">
+                            Sign Up <i class="fas fa-sign-in-alt ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Competition 2 -->
+                <div class="competition-card bg-white rounded-xl overflow-hidden shadow-lg">
+                    <div class="h-48 bg-[url('https://images.unsplash.com/photo-1468413253725-0d5181091126?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center"></div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold text-amber-800 mb-2">Pharaoh's Forgotten Tomb</h3>
+                        <p class="text-gray-600 mb-4">Decode hieroglyphics and navigate ancient ruins to uncover the burial chamber's secrets.</p>
+                        <div class="mb-4">
+                            <span class="inline-block bg-amber-200 text-amber-800 px-3 py-1 rounded-full text-sm font-semibold mr-2">Difficulty: Hard</span>
+                            <span class="inline-block bg-blue-200 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">Duration: 5 days</span>
+                        </div>
+                        <button class="reveal-clue-btn bg-amber-600 hover:bg-amber-700 text-white py-2 px-4 rounded-lg transition w-full" data-clue="2">
+                            Reveal First Clue <i class="fas fa-eye ml-2"></i>
+                        </button>
+                        <div id="clue-2" class="clue-reveal mt-4 hidden p-4 bg-amber-50 rounded-lg border border-amber-200">
+                            <h4 class="font-bold text-amber-800 mb-2">First Clue:</h4>
+                            <p>"When the sun kisses the horizon at dawn, count the pillars where the jackals yawn. The third from the left holds a secret mark, that will guide you through the dark."</p>
+                        </div>
+                        <button class="signup-btn mt-4 bg-amber-800 hover:bg-amber-900 text-white py-2 px-4 rounded-lg transition w-full">
+                            Sign Up <i class="fas fa-sign-in-alt ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Competition 3 -->
+                <div class="competition-card bg-white rounded-xl overflow-hidden shadow-lg">
+                    <div class="h-48 bg-[url('https://images.unsplash.com/photo-1530046339916-102c1e13d5f9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center"></div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold text-amber-800 mb-2">The Dragon's Hoard</h3>
+                        <p class="text-gray-600 mb-4">Navigate medieval castles and decipher knightly codes to find the legendary dragon's treasure.</p>
+                        <div class="mb-4">
+                            <span class="inline-block bg-amber-200 text-amber-800 px-3 py-1 rounded-full text-sm font-semibold mr-2">Difficulty: Medium</span>
+                            <span class="inline-block bg-blue-200 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">Duration: 4 days</span>
+                        </div>
+                        <button class="reveal-clue-btn bg-amber-600 hover:bg-amber-700 text-white py-2 px-4 rounded-lg transition w-full" data-clue="3">
+                            Reveal First Clue <i class="fas fa-eye ml-2"></i>
+                        </button>
+                        <div id="clue-3" class="clue-reveal mt-4 hidden p-4 bg-amber-50 rounded-lg border border-amber-200">
+                            <h4 class="font-bold text-amber-800 mb-2">First Clue:</h4>
+                            <p>"Where the banners of red and gold once flew, find the shield with a dent askew. Beneath the stone where the raven calls, your journey to riches begins in these halls."</p>
+                        </div>
+                        <button class="signup-btn mt-4 bg-amber-800 hover:bg-amber-900 text-white py-2 px-4 rounded-lg transition w-full">
+                            Sign Up <i class="fas fa-sign-in-alt ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Competition 4 -->
+                <div class="competition-card bg-white rounded-xl overflow-hidden shadow-lg">
+                    <div class="h-48 bg-[url('https://images.unsplash.com/photo-1476231682828-37e571bc172f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80')] bg-cover bg-center"></div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold text-amber-800 mb-2">The Arctic Expedition</h3>
+                        <p class="text-gray-600 mb-4">Follow the trail of a lost explorer through frozen wastelands to recover a priceless artifact.</p>
+                        <div class="mb-4">
+                            <span class="inline-block bg-amber-200 text-amber-800 px-3 py-1 rounded-full text-sm font-semibold mr-2">Difficulty: Hard</span>
+                            <span class="inline-block bg-blue-200 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">Duration: 7 days</span>
+                        </div>
+                        <button class="reveal-clue-btn bg-amber-600 hover:bg-amber-700 text-white py-2 px-4 rounded-lg transition w-full" data-clue="4">
+                            Reveal First Clue <i class="fas fa-eye ml-2"></i>
+                        </button>
+                        <div id="clue-4" class="clue-reveal mt-4 hidden p-4 bg-amber-50 rounded-lg border border-amber-200">
+                            <h4 class="font-bold text-amber-800 mb-2">First Clue:</h4>
+                            <p>"Where the northern lights dance in the sky, find the cabin where the old man would lie. In his journal on page forty-two, the coordinates will guide you true."</p>
+                        </div>
+                        <button class="signup-btn mt-4 bg-amber-800 hover:bg-amber-900 text-white py-2 px-4 rounded-lg transition w-full">
+                            Sign Up <i class="fas fa-sign-in-alt ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Competition 5 -->
+                <div class="competition-card bg-white rounded-xl overflow-hidden shadow-lg">
+                    <div class="h-48 bg-[url('https://images.unsplash.com/photo-1527631746610-bca00a040d60?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center"></div>
+                    <div class="p-6">
+                        <h3 class="text-2xl font-bold text-amber-800 mb-2">The Urban Treasure Trail</h3>
+                        <p class="text-gray-600 mb-4">Solve modern puzzles hidden in plain sight across the city to uncover a contemporary fortune.</p>
+                        <div class="mb-4">
+                            <span class="inline-block bg-amber-200 text-amber-800 px-3 py-1 rounded-full text-sm font-semibold mr-2">Difficulty: Easy</span>
+                            <span class="inline-block bg-blue-200 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">Duration: 2 days</span>
+                        </div>
+                        <button class="reveal-clue-btn bg-amber-600 hover:bg-amber-700 text-white py-2 px-4 rounded-lg transition w-full" data-clue="5">
+                            Reveal First Clue <i class="fas fa-eye ml-2"></i>
+                        </button>
+                        <div id="clue-5" class="clue-reveal mt-4 hidden p-4 bg-amber-50 rounded-lg border border-amber-200">
+                            <h4 class="font-bold text-amber-800 mb-2">First Clue:</h4>
+                            <p>"Where the clock strikes twelve but never chimes, find the mural of forgotten times. The artist left a hidden code, in the colors of the rainbow road."</p>
+                        </div>
+                        <button class="signup-btn mt-4 bg-amber-800 hover:bg-amber-900 text-white py-2 px-4 rounded-lg transition w-full">
+                            Sign Up <i class="fas fa-sign-in-alt ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-16 bg-amber-800 text-amber-50">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-8 md:mb-0 md:pr-8">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-6">About TreasureQuest</h2>
+                    <p class="text-lg mb-4">TreasureQuest brings you the most exciting treasure hunt competitions around the world. Each adventure is carefully crafted to challenge your problem-solving skills while immersing you in captivating stories.</p>
+                    <p class="text-lg mb-4">Our competitions blend history, mystery, and adventure to create unforgettable experiences. Whether you're a seasoned treasure hunter or a curious beginner, we have challenges suited for all levels.</p>
+                    <p class="text-lg">Sign up today and embark on a journey that will test your wit, perseverance, and sense of adventure!</p>
+                </div>
+                <div class="md:w-1/2">
+                    <div class="bg-amber-700 p-6 rounded-xl shadow-lg">
+                        <h3 class="text-2xl font-bold mb-4">How It Works</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <div class="bg-amber-600 rounded-full p-2 mr-4">
+                                    <i class="fas fa-search text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">1. Choose Your Challenge</h4>
+                                    <p>Select from our diverse range of treasure hunt competitions.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="bg-amber-600 rounded-full p-2 mr-4">
+                                    <i class="fas fa-user-plus text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">2. Register Your Team</h4>
+                                    <p>Sign up individually or with friends (1-4 people per team).</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="bg-amber-600 rounded-full p-2 mr-4">
+                                    <i class="fas fa-map-marked-alt text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">3. Receive Your First Clue</h4>
+                                    <p>Get your starting point and initial puzzle to solve.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="bg-amber-600 rounded-full p-2 mr-4">
+                                    <i class="fas fa-trophy text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">4. Complete the Hunt</h4>
+                                    <p>Follow the trail, solve all clues, and claim your prize!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-16 bg-amber-50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-amber-900 mb-12">Frequently Asked Questions</h2>
+
+            <div class="max-w-3xl mx-auto">
+                <div class="mb-6">
+                    <button class="faq-question w-full text-left bg-amber-200 hover:bg-amber-300 text-amber-900 font-bold py-3 px-6 rounded-lg transition flex justify-between items-center">
+                        <span>Do I need any special equipment?</span>
+                        <i class="fas fa-chevron-down transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-answer hidden bg-white p-6 rounded-b-lg shadow">
+                        <p>Most competitions only require a smartphone with internet access. Some outdoor adventures might recommend comfortable shoes and weather-appropriate clothing. Specific requirements will be listed in the competition details.</p>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <button class="faq-question w-full text-left bg-amber-200 hover:bg-amber-300 text-amber-900 font-bold py-3 px-6 rounded-lg transition flex justify-between items-center">
+                        <span>Can I participate alone or do I need a team?</span>
+                        <i class="fas fa-chevron-down transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-answer hidden bg-white p-6 rounded-b-lg shadow">
+                        <p>You can participate alone or in teams of up to 4 people. Some people enjoy the challenge of solving clues independently, while others prefer collaborating with friends. Team registration often provides a small discount.</p>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <button class="faq-question w-full text-left bg-amber-200 hover:bg-amber-300 text-amber-900 font-bold py-3 px-6 rounded-lg transition flex justify-between items-center">
+                        <span>Are the competitions physically demanding?</span>
+                        <i class="fas fa-chevron-down transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-answer hidden bg-white p-6 rounded-b-lg shadow">
+                        <p>Difficulty varies by competition. Urban treasure hunts typically involve walking around a city, while some wilderness adventures may require hiking. Each competition's physical requirements are clearly indicated in its description.</p>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <button class="faq-question w-full text-left bg-amber-200 hover:bg-amber-300 text-amber-900 font-bold py-3 px-6 rounded-lg transition flex justify-between items-center">
+                        <span>What happens if I can't solve a clue?</span>
+                        <i class="fas fa-chevron-down transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-answer hidden bg-white p-6 rounded-b-lg shadow">
+                        <p>We provide a hint system for each clue. After a set time without progress, you can request increasingly helpful hints. Our goal is to keep the challenge enjoyable while ensuring everyone can eventually progress.</p>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <button class="faq-question w-full text-left bg-amber-200 hover:bg-amber-300 text-amber-900 font-bold py-3 px-6 rounded-lg transition flex justify-between items-center">
+                        <span>What kind of prizes can I win?</span>
+                        <i class="fas fa-chevron-down transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-answer hidden bg-white p-6 rounded-b-lg shadow">
+                        <p>Prizes vary by competition and may include cash rewards, unique experiences, or valuable artifacts related to the treasure hunt theme. All participants receive a certificate of completion and often small souvenirs from the adventure.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Signup Modal -->
+    <div id="signup-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4 relative">
+            <button id="close-modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times text-xl"></i>
             </button>
-          </div>
-        </div>
-
-        <!-- (Keep your other 4 cards exactly like this one’s structure) -->
-        <!-- ... -->
-      </div>
-    </div>
-  </section>
-
-  <!-- About Section -->
-  <section id="about" class="py-16 bg-amber-800 text-amber-50">
-    <div class="container mx-auto px-4">
-      <div class="flex flex-col md:flex-row items-center">
-        <div class="md:w-1/2 mb-8 md:mb-0 md:pr-8">
-          <h2 class="text-3xl md:text-4xl font-bold mb-6">About TreasureQuest</h2>
-          <p class="text-lg mb-4">TreasureQuest brings you the most exciting treasure hunt competitions around the world. Each adventure is carefully crafted to challenge your problem-solving skills while immersing you in captivating stories.</p>
-          <p class="text-lg mb-4">Our competitions blend history, mystery, and adventure to create unforgettable experiences. Whether you're a seasoned treasure hunter or a curious beginner, we have challenges suited for all levels.</p>
-          <p class="text-lg">Sign up today and embark on a journey that will test your wit, perseverance, and sense of adventure!</p>
-        </div>
-        <div class="md:w-1/2">
-          <div class="bg-amber-700 p-6 rounded-xl shadow-lg">
-            <h3 class="text-2xl font-bold mb-4">How It Works</h3>
-            <div class="space-y-4">
-              <div class="flex items-start">
-                <div class="bg-amber-600 rounded-full p-2 mr-4">
-                  <i class="fas fa-search text-white"></i>
+            <h3 class="text-2xl font-bold text-amber-800 mb-6">Join the Treasure Hunt</h3>
+            <form id="signup-form">
+                <div class="mb-4">
+                    <label for="name" class="block text-gray-700 font-medium mb-2">Full Name</label>
+                    <input type="text" id="name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
                 </div>
-                <div>
-                  <h4 class="font-bold">1. Choose Your Challenge</h4>
-                  <p>Select from our diverse range of treasure hunt competitions.</p>
+                <div class="mb-4">
+                    <label for="email" class="block text-gray-700 font-medium mb-2">Email Address</label>
+                    <input type="email" id="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
                 </div>
-              </div>
-              <div class="flex items-start">
-                <div class="bg-amber-600 rounded-full p-2 mr-4">
-                  <i class="fas fa-user-plus text-white"></i>
+                <div class="mb-4">
+                    <label for="competition" class="block text-gray-700 font-medium mb-2">Competition</label>
+                    <select id="competition" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
+                        <option value="">Select a competition</option>
+                        <option value="The Lost Pirate Gold">The Lost Pirate Gold</option>
+                        <option value="Pharaoh's Forgotten Tomb">Pharaoh's Forgotten Tomb</option>
+                        <option value="The Dragon's Hoard">The Dragon's Hoard</option>
+                        <option value="The Arctic Expedition">The Arctic Expedition</option>
+                        <option value="The Urban Treasure Trail">The Urban Treasure Trail</option>
+                    </select>
                 </div>
-                <div>
-                  <h4 class="font-bold">2. Register Your Team</h4>
-                  <p>Sign up individually or with friends (1-4 people per team).</p>
+                <div class="mb-6">
+                    <label for="team-size" class="block text-gray-700 font-medium mb-2">Team Size</label>
+                    <select id="team-size" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
+                        <option value="1">1 (Solo)</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
                 </div>
-              </div>
-              <div class="flex items-start">
-                <div class="bg-amber-600 rounded-full p-2 mr-4">
-                  <i class="fas fa-map-marked-alt text-white"></i>
-                </div>
-                <div>
-                  <h4 class="font-bold">3. Receive Your First Clue</h4>
-                  <p>Get your starting point and initial puzzle to solve.</p>
-                </div>
-              </div>
-              <div class="flex items-start">
-                <div class="bg-amber-600 rounded-full p-2 mr-4">
-                  <i class="fas fa-trophy text-white"></i>
-                </div>
-                <div>
-                  <h4 class="font-bold">4. Complete the Hunt</h4>
-                  <p>Follow the trail, solve all clues, and claim your prize!</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FAQ Section -->
-  <section id="faq" class="py-16 bg-amber-50">
-    <div class="container mx-auto px-4">
-      <h2 class="text-3xl md:text-4xl font-bold text-center text-amber-900 mb-12">Frequently Asked Questions</h2>
-      <div class="max-w-3xl mx-auto">
-        <!-- (Keep your FAQ blocks as-is) -->
-        <div class="mb-6">
-          <button class="faq-question w-full text-left bg-amber-200 hover:bg-amber-300 text-amber-900 font-bold py-3 px-6 rounded-lg transition flex justify-between items-center">
-            <span>Do I need any special equipment?</span>
-            <i class="fas fa-chevron-down transition-transform duration-300"></i>
-          </button>
-          <div class="faq-answer hidden bg-white p-6 rounded-b-lg shadow">
-            <p>Most competitions only require a smartphone with internet access. Some outdoor adventures might recommend comfortable shoes and weather-appropriate clothing. Specific requirements will be listed in the competition details.</p>
-          </div>
-        </div>
-        <!-- (etc.) -->
-      </div>
-    </div>
-  </section>
-
-  <!-- Signup Modal -->
-  <div id="signup-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4 relative">
-      <button id="close-modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
-        <i class="fas fa-times text-xl"></i>
-      </button>
-      <h3 class="text-2xl font-bold text-amber-800 mb-6">Join the Treasure Hunt</h3>
-      <form id="signup-form">
-        <div class="mb-4">
-          <label for="name" class="block text-gray-700 font-medium mb-2">Full Name</label>
-          <input type="text" id="name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
-        </div>
-        <div class="mb-4">
-          <label for="email" class="block text-gray-700 font-medium mb-2">Email Address</label>
-          <input type="email" id="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
-        </div>
-        <div class="mb-4">
-          <label for="competition" class="block text-gray-700 font-medium mb-2">Competition</label>
-          <select id="competition" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
-            <option value="">Select a competition</option>
-            <option value="The Lost Pirate Gold">The Lost Pirate Gold</option>
-            <option value="Pharaoh's Forgotten Tomb">Pharaoh's Forgotten Tomb</option>
-            <option value="The Dragon's Hoard">The Dragon's Hoard</option>
-            <option value="The Arctic Expedition">The Arctic Expedition</option>
-            <option value="The Urban Treasure Trail">The Urban Treasure Trail</option>
-          </select>
-        </div>
-        <div class="mb-6">
-          <label for="team-size" class="block text-gray-700 font-medium mb-2">Team Size</label>
-          <select id="team-size" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
-            <option value="1">1 (Solo)</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-          </select>
-        </div>
-        <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-4 rounded-lg transition">
-          Register Now <i class="fas fa-arrow-right ml-2"></i>
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Success Modal -->
-  <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4 text-center">
-      <div class="text-green-500 text-6xl mb-4"><i class="fas fa-check-circle"></i></div>
-      <h3 class="text-2xl font-bold text-gray-800 mb-4">Registration Successful!</h3>
-      <p class="text-gray-600 mb-6">Thank you for signing up for our treasure hunt competition. We've sent confirmation details to your email address.</p>
-      <button id="close-success-modal" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-6 rounded-lg transition">
-        Continue Exploring
-      </button>
-    </div>
-  </div>
-
-  <!-- Auth Modal -->
-  <div id="authModal" class="auth-modal" hidden>
-    <div class="auth-backdrop" data-auth-close="true"></div>
-    <div class="auth-dialog" role="dialog" aria-modal="true" aria-labelledby="authTitle">
-      <button class="auth-close" aria-label="Close" data-auth-close="true">×</button>
-
-      <div class="auth-tabs" role="tablist" aria-label="Authentication">
-        <button id="authTabLogin" class="auth-tab is-active" role="tab" aria-selected="true" data-auth-tab="login">Log in</button>
-        <button id="authTabSignup" class="auth-tab" role="tab" aria-selected="false" data-auth-tab="signup">Sign up</button>
-      </div>
-
-      <section class="auth-panel is-active" id="authLoginPanel" role="tabpanel" aria-labelledby="authTabLogin">
-        <h2 id="authTitle">Welcome back</h2>
-        <form id="authLoginForm" class="auth-form" autocomplete="on">
-          <label>
-            Email
-            <input name="email" type="email" required autocomplete="email" />
-          </label>
-          <label>
-            Password
-            <input name="password" type="password" required autocomplete="current-password" />
-          </label>
-          <button type="submit" class="btn primary">Log in</button>
-          <button id="authForgot" type="button" class="btn" style="margin-top:8px;">Forgot password?</button>
-          <p class="auth-status" id="authLoginStatus"></p>
-        </form>
-      </section>
-
-      <section class="auth-panel" id="authSignupPanel" role="tabpanel" aria-labelledby="authTabSignup" hidden>
-        <h2>Create your account</h2>
-        <form id="authSignupForm" class="auth-form" autocomplete="on">
-          <label>
-            Email
-            <input name="email" type="email" required autocomplete="email" />
-          </label>
-          <label>
-            Username (public)
-            <input name="username" type="text" minlength="3" maxlength="24" autocomplete="username" />
-          </label>
-          <label>
-            Password
-            <input name="password" type="password" minlength="6" required autocomplete="new-password" />
-          </label>
-          <label>
-            Confirm password
-            <input name="confirm" type="password" minlength="6" required autocomplete="new-password" />
-          </label>
-          <button type="submit" class="btn primary">Sign up</button>
-          <p class="auth-status" id="authSignupStatus"></p>
-        </form>
-      </section>
-    </div>
-  </div>
-
-  <!-- Profile Dropdown (visible when logged in) -->
-  <div id="authProfileDropdown" class="auth-profile-dropdown" hidden>
-    <div class="auth-profile-summary">
-      <div class="auth-avatar" aria-hidden="true">👤</div>
-      <div class="auth-who">
-        <strong id="authPdName">User</strong>
-        <span>Signed in</span>
-      </div>
-    </div>
-    <div class="auth-profile-actions">
-      <a id="authGoProfile" href="/profile.html" class="auth-pd-link">My Profile</a>
-      <button id="authLogoutBtn" class="auth-pd-btn">Log out</button>
-    </div>
-  </div>
-
-  <!-- Request password reset (enter email) -->
-  <div id="authResetModal" class="auth-modal" hidden>
-    <div class="auth-backdrop" data-auth-close="true"></div>
-    <div class="auth-dialog" role="dialog" aria-modal="true" aria-labelledby="authResetTitle">
-      <button class="auth-close" aria-label="Close" data-auth-close="true">×</button>
-      <section class="auth-panel is-active" id="authResetPanel" role="tabpanel">
-        <h2 id="authResetTitle">Reset your password</h2>
-        <form id="authResetForm" class="auth-form" autocomplete="on">
-          <label>
-            Email
-            <input name="email" type="email" required autocomplete="email" />
-          </label>
-          <button type="submit" class="btn primary">Send reset link</button>
-          <p class="auth-status" id="authResetStatus"></p>
-        </form>
-      </section>
-    </div>
-  </div>
-
-  <!-- Set new password (after Supabase recovery link) -->
-  <div id="authNewPwdModal" class="auth-modal" hidden>
-    <div class="auth-backdrop" data-auth-close="true"></div>
-    <div class="auth-dialog" role="dialog" aria-modal="true" aria-labelledby="authNewPwdTitle">
-      <button class="auth-close" aria-label="Close" data-auth-close="true">×</button>
-      <section class="auth-panel is-active" id="authNewPwdPanel" role="tabpanel">
-        <h2 id="authNewPwdTitle">Set a new password</h2>
-        <form id="authNewPwdForm" class="auth-form" autocomplete="on">
-          <label>
-            New password
-            <input name="password" type="password" minlength="6" required autocomplete="new-password" />
-          </label>
-          <label>
-            Confirm new password
-            <input name="confirm" type="password" minlength="6" required autocomplete="new-password" />
-          </label>
-          <button type="submit" class="btn primary">Update password</button>
-          <p class="auth-status" id="authNewPwdStatus"></p>
-        </form>
-      </section>
-    </div>
-  </div>
-
-  <!-- Footer -->
-  <footer class="bg-amber-900 text-amber-200 py-12">
-    <div class="container mx-auto px-4">
-      <!-- (Keep your footer content as-is) -->
-      <div class="flex flex-col md:flex-row justify-between">
-        <div class="mb-8 md:mb-0">
-          <div class="flex items-center space-x-2 mb-4">
-            <i class="fas fa-map-marked-alt text-2xl"></i>
-            <span class="text-xl font-bold text-amber-50">Kincsestérkép</span>
-          </div>
-          <p class="max-w-xs">Embark on unforgettable adventures and uncover hidden treasures around the world.</p>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
-          <div>
-            <h4 class="text-lg font-bold text-amber-50 mb-4">Quick Links</h4>
-            <ul class="space-y-2">
-              <li><a href="#my profile" class="hover:text-amber-100 transition">My Profile</a></li>
-              <li><a href="#competitions" class="hover:text-amber-100 transition">Competitions</a></li>
-              <li><a href="#about" class="hover:text-amber-100 transition">About Us</a></li>
-              <li><a href="#faq" class="hover:text-amber-100 transition">FAQ</a></li>
-              <li><a href="#" class="hover:text-amber-100 transition">Terms & Conditions</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 class="text-lg font-bold text-amber-50 mb-4">Contact</h4>
-            <ul class="space-y-2">
-              <li class="flex items-start"><i class="fas fa-envelope mt-1 mr-2"></i><span>info@kincsesterkep.com</span></li>
-              <li class="flex items-start"><i class="fas fa-phone-alt mt-1 mr-2"></i><span>+1 (555) 123-4567</span></li>
-              <li class="flex items-start"><i class="fas fa-map-marker-alt mt-1 mr-2"></i><span>123 Adventure Lane, Treasure City</span></li>
-            </ul>
-          </div>
-          <div>
-            <h4 class="text-lg font-bold text-amber-50 mb-4">Follow Us</h4>
-            <div class="flex space-x-4">
-              <a href="#" class="text-2xl hover:text-amber-100 transition"><i class="fab fa-facebook"></i></a>
-              <a href="#" class="text-2xl hover:text-amber-100 transition"><i class="fab fa-twitter"></i></a>
-              <a href="#" class="text-2xl hover:text-amber-100 transition"><i class="fab fa-instagram"></i></a>
-              <a href="#" class="text-2xl hover:text-amber-100 transition"><i class="fab fa-youtube"></i></a>
-            </div>
-            <div class="mt-6">
-              <p class="text-sm">Subscribe to our newsletter</p>
-              <div class="flex mt-2">
-                <input type="email" placeholder="Your email" class="px-3 py-2 rounded-l-lg bg-amber-800 text-white border border-amber-700 focus:outline-none focus:ring-1 focus:ring-amber-500">
-                <button class="bg-amber-600 hover:bg-amber-700 px-4 rounded-r-lg transition">
-                  <i class="fas fa-paper-plane"></i>
+                <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-4 rounded-lg transition">
+                    Register Now <i class="fas fa-arrow-right ml-2"></i>
                 </button>
-              </div>
-            </div>
-          </div>
+            </form>
         </div>
-      </div>
-      <div class="border-t border-amber-800 mt-12 pt-6 text-center text-sm">
-        <p>&copy; 2025 Kincsestérkép. All rights reserved.</p>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4 text-center">
+            <div class="text-green-500 text-6xl mb-4">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">Registration Successful!</h3>
+            <p class="text-gray-600 mb-6">Thank you for signing up for our treasure hunt competition. We've sent confirmation details to your email address.</p>
+            <button id="close-success-modal" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-6 rounded-lg transition">
+                Continue Exploring
+            </button>
+        </div>
+    </div>
+
+    <!-- For Supabase -->
+    <div id="authModal" class="auth-modal" hidden>
+      <div class="auth-backdrop" data-auth-close="true"></div>
+      <div class="auth-dialog" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+        <button class="auth-close" aria-label="Close" data-auth-close="true">×</button>
+
+        <div class="auth-tabs" role="tablist" aria-label="Authentication">
+          <button id="authTabLogin" class="auth-tab is-active" role="tab" aria-selected="true" data-auth-tab="login">Log in</button>
+          <button id="authTabSignup" class="auth-tab" role="tab" aria-selected="false" data-auth-tab="signup">Sign up</button>
+        </div>
+
+        <section class="auth-panel is-active" id="authLoginPanel" role="tabpanel" aria-labelledby="authTabLogin">
+          <h2 id="authTitle">Welcome back</h2>
+          <form id="authLoginForm" class="auth-form" autocomplete="on">
+            <label>
+              Email
+              <input name="email" type="email" required autocomplete="email" />
+            </label>
+            <label>
+              Password
+              <input name="password" type="password" required autocomplete="current-password" />
+            </label>
+            <button type="submit" class="btn primary">Log in</button>
+            <p class="auth-status" id="authLoginStatus"></p>
+          </form>
+        </section>
+
+        <section class="auth-panel" id="authSignupPanel" role="tabpanel" aria-labelledby="authTabSignup" hidden>
+          <h2>Create your account</h2>
+          <form id="authSignupForm" class="auth-form" autocomplete="on">
+            <label>
+              Email
+              <input name="email" type="email" required autocomplete="email" />
+            </label>
+            <label>
+              Username (public)
+              <input name="username" type="text" minlength="3" maxlength="24" autocomplete="username" />
+            </label>
+            <label>
+              Password
+              <input name="password" type="password" minlength="6" required autocomplete="new-password" />
+            </label>
+            <label>
+              Confirm password
+              <input name="confirm" type="password" minlength="6" required autocomplete="new-password" />
+            </label>
+            <button type="submit" class="btn primary">Sign up</button>
+            <p class="auth-status" id="authSignupStatus"></p>
+          </form>
+        </section>
       </div>
     </div>
-  </footer>
 
-  <script>
-    // Mobile menu toggle
-    document.getElementById('mobile-menu-button').addEventListener('click', function() {
-      const menu = document.getElementById('mobile-menu');
-      menu.classList.toggle('hidden');
-    });
+    <!-- Profile Dropdown (visible when logged in) -->
+    <div id="authProfileDropdown" class="auth-profile-dropdown" hidden>
+      <div class="auth-profile-summary">
+        <div class="auth-avatar" aria-hidden="true">👤</div>
+        <div class="auth-who">
+          <strong id="authPdName">User</strong>
+          <span>Signed in</span>
+        </div>
+      </div>
+      <div class="auth-profile-actions">
+        <!-- Update href once your profile page exists -->
+        <a id="authGoProfile" href="/profile.html" class="auth-pd-link">My Profile</a>
+        <button id="authLogoutBtn" class="auth-pd-btn">Log out</button>
+      </div>
+    </div>
 
-    // Reveal clue functionality
-    document.querySelectorAll('.reveal-clue-btn').forEach(button => {
-      button.addEventListener('click', function() {
-        const clueId = this.getAttribute('data-clue');
-        const clueElement = document.getElementById(`clue-${clueId}`);
-        if (clueElement.classList.contains('hidden')) {
-          clueElement.classList.remove('hidden');
-          this.innerHTML = 'Hide Clue <i class="fas fa-eye-slash ml-2"></i>';
-        } else {
-          clueElement.classList.add('hidden');
-          this.innerHTML = 'Reveal First Clue <i class="fas fa-eye ml-2"></i>';
-        }
-      });
-    });
+    <!-- Footer -->
+    <footer class="bg-amber-900 text-amber-200 py-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between">
+                <div class="mb-8 md:mb-0">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <i class="fas fa-map-marked-alt text-2xl"></i>
+                        <span class="text-xl font-bold text-amber-50">Kincsestérkép</span>
+                    </div>
+                    <p class="max-w-xs">Embark on unforgettable adventures and uncover hidden treasures around the world.</p>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
+                    <div>
+                        <h4 class="text-lg font-bold text-amber-50 mb-4">Quick Links</h4>
+                        <ul class="space-y-2">
+                            <li><a href="#my profile" class="hover:text-amber-100 transition">My Profile</a></li>
+                            <li><a href="#competitions" class="hover:text-amber-100 transition">Competitions</a></li>
+                            <li><a href="#about" class="hover:text-amber-100 transition">About Us</a></li>
+                            <li><a href="#faq" class="hover:text-amber-100 transition">FAQ</a></li>
+                            <li><a href="#" class="hover:text-amber-100 transition">Terms & Conditions</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-bold text-amber-50 mb-4">Contact</h4>
+                        <ul class="space-y-2">
+                            <li class="flex items-start">
+                                <i class="fas fa-envelope mt-1 mr-2"></i>
+                                <span>info@kincsesterkep.com</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-phone-alt mt-1 mr-2"></i>
+                                <span>+1 (555) 123-4567</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-map-marker-alt mt-1 mr-2"></i>
+                                <span>123 Adventure Lane, Treasure City</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-bold text-amber-50 mb-4">Follow Us</h4>
+                        <div class="flex space-x-4">
+                            <a href="#" class="text-2xl hover:text-amber-100 transition"><i class="fab fa-facebook"></i></a>
+                            <a href="#" class="text-2xl hover:text-amber-100 transition"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="text-2xl hover:text-amber-100 transition"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="text-2xl hover:text-amber-100 transition"><i class="fab fa-youtube"></i></a>
+                        </div>
+                        <div class="mt-6">
+                            <p class="text-sm">Subscribe to our newsletter</p>
+                            <div class="flex mt-2">
+                                <input type="email" placeholder="Your email" class="px-3 py-2 rounded-l-lg bg-amber-800 text-white border border-amber-700 focus:outline-none focus:ring-1 focus:ring-amber-500">
+                                <button class="bg-amber-600 hover:bg-amber-700 px-4 rounded-r-lg transition">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-amber-800 mt-12 pt-6 text-center text-sm">
+                <p>&copy; 2025 Kincsestérkép. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
 
-    // FAQ accordion
-    document.querySelectorAll('.faq-question').forEach(question => {
-      question.addEventListener('click', function() {
-        const answer = this.nextElementSibling;
-        const icon = this.querySelector('i');
-        if (answer.classList.contains('hidden')) {
-          answer.classList.remove('hidden'); icon.classList.add('rotate-180');
-        } else {
-          answer.classList.add('hidden'); icon.classList.remove('rotate-180');
-        }
-      });
-    });
-
-    // Signup modal
-    const signupModal = document.getElementById('signup-modal');
-    const successModal = document.getElementById('success-modal');
-    const signupButtons = document.querySelectorAll('.signup-btn');
-    const closeModal = document.getElementById('close-modal');
-    const closeSuccessModal = document.getElementById('close-success-modal');
-    const signupForm = document.getElementById('signup-form');
-
-    signupButtons.forEach(button => {
-      button.addEventListener('click', function() {
-        signupModal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-      });
-    });
-
-    closeModal.addEventListener('click', function() {
-      signupModal.classList.add('hidden');
-      document.body.style.overflow = 'auto';
-    });
-
-    closeSuccessModal.addEventListener('click', function() {
-      successModal.classList.add('hidden');
-      document.body.style.overflow = 'auto';
-    });
-
-    signupForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      signupModal.classList.add('hidden');
-      successModal.classList.remove('hidden');
-      this.reset();
-    });
-
-    // Close modals when clicking outside
-    window.addEventListener('click', function(e) {
-      if (e.target === signupModal) {
-        signupModal.classList.add('hidden');
-        document.body.style.overflow = 'auto';
-      }
-      if (e.target === successModal) {
-        successModal.classList.add('hidden');
-        document.body.style.overflow = 'auto';
-      }
-    });
-
-    // Smooth scrolling (ignore profile buttons & bare #)
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      if (anchor.id === "authProfileLink" || anchor.id === "authProfileLinkMobile") return;
-      if (anchor.getAttribute('href') === "#") return;
-      anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        const targetId = this.getAttribute('href');
-        const targetElement = document.querySelector(targetId);
-        if (!targetElement) return;
-        window.scrollTo({ top: targetElement.offsetTop - 80, behavior: 'smooth' });
-        const mobileMenu = document.getElementById('mobile-menu');
-        if (mobileMenu && !mobileMenu.classList.contains('hidden')) mobileMenu.classList.add('hidden');
-      });
-    });
-  </script>
-
-  <script>
-    (() => {
-      // ===== CONFIG: fill these with your Supabase project details =====
-      const SUPABASE_URL = "https://nwdoflrxaxjutbhhceyw.supabase.co";
-      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53ZG9mbHJ4YXhqdXRiaGhjZXl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE0NDUyOTEsImV4cCI6MjA3NzAyMTI5MX0.RTgzc0lkIVtm6TCtcnL-nktetP7UXZutDauXuZ29iNQ";
-
-      // ===== Init client =====
-      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-      // ===== Elements =====
-      const desktopLink = document.getElementById("authProfileLink");
-      const mobileLink  = document.getElementById("authProfileLinkMobile");
-      const dropdown    = document.getElementById("authProfileDropdown");
-      const pdName      = document.getElementById("authPdName");
-      const goProfile   = document.getElementById("authGoProfile");
-      const logoutBtn   = document.getElementById("authLogoutBtn");
-
-      const modal        = document.getElementById("authModal");
-      const loginForm    = document.getElementById("authLoginForm");
-      const signupForm   = document.getElementById("authSignupForm");
-      const loginStatus  = document.getElementById("authLoginStatus");
-      const signupStatus = document.getElementById("authSignupStatus");
-      const tabs         = Array.from(document.querySelectorAll("[data-auth-tab]"));
-      const loginPanel   = document.getElementById("authLoginPanel");
-      const signupPanel  = document.getElementById("authSignupPanel");
-
-      // Forgot/Reset elements
-      const forgotBtn    = document.getElementById("authForgot");
-      const resetModal   = document.getElementById("authResetModal");
-      const resetForm    = document.getElementById("authResetForm");
-      const resetStatus  = document.getElementById("authResetStatus");
-
-      const newPwdModal  = document.getElementById("authNewPwdModal");
-      const newPwdForm   = document.getElementById("authNewPwdForm");
-      const newPwdStatus = document.getElementById("authNewPwdStatus");
-
-      // ===== UI helpers =====
-      function labelFromUser(user){
-        const uname = user?.user_metadata?.username;
-        return uname && String(uname).trim() ? uname : (user?.email || "User");
-      }
-      function setLoggedInUI(user){
-        const label = labelFromUser(user);
-        if(desktopLink){
-          desktopLink.textContent = `My Profile (${label})`;
-          desktopLink.setAttribute("data-auth","authed");
-        }
-        if(mobileLink){
-          mobileLink.textContent = `My Profile (${label})`;
-          mobileLink.setAttribute("data-auth","authed");
-        }
-        if(pdName) pdName.textContent = label;
-      }
-      function setLoggedOutUI(){
-        if(desktopLink){
-          desktopLink.textContent = "My Profile";
-          desktopLink.setAttribute("data-auth","gate");
-        }
-        if(mobileLink){
-          mobileLink.textContent = "My Profile";
-          mobileLink.setAttribute("data-auth","gate");
-        }
-        hideDropdown();
-      }
-      function showModal(which="login"){
-        if(!modal) return;
-        modal.hidden = false;
-        switchTab(which);
-        if(which === "login") loginStatus.textContent = "";
-        else signupStatus.textContent = "";
-      }
-      function hideModal(){ if(modal) modal.hidden = true; }
-      function toggleDropdown(){ if(dropdown) dropdown.hidden = !dropdown.hidden; }
-      function hideDropdown(){ if(dropdown) dropdown.hidden = true; }
-      function switchTab(which){
-        tabs.forEach(t => {
-          const is = t.dataset.authTab === which;
-          t.classList.toggle("is-active", is);
-          t.setAttribute("aria-selected", String(is));
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
         });
-        const isLogin = which === "login";
-        loginPanel.classList.toggle("is-active", isLogin);
-        signupPanel.classList.toggle("is-active", !isLogin);
-        loginPanel.hidden = !isLogin;
-        signupPanel.hidden = isLogin;
-      }
 
-      // ===== Session bootstrap =====
-      (async () => {
-        const { data } = await sb.auth.getSession();
-        if(data?.session?.user){
-          setLoggedInUI(data.session.user);
-        } else {
-          setLoggedOutUI();
-        }
-      })();
+        // Reveal clue functionality
+        document.querySelectorAll('.reveal-clue-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const clueId = this.getAttribute('data-clue');
+                const clueElement = document.getElementById(`clue-${clueId}`);
 
-      // ===== Auth state listener =====
-      sb.auth.onAuthStateChange((event, session) => {
-        if (event === "PASSWORD_RECOVERY") {
-          // Show the new password modal
-          try { hideModal(); hideResetModal(); } catch {}
-          if (newPwdModal) newPwdModal.hidden = false;
-          return;
-        }
-        if(session?.user){ setLoggedInUI(session.user); }
-        else { setLoggedOutUI(); }
-      });
+                // Toggle clue visibility
+                if (clueElement.classList.contains('hidden')) {
+                    clueElement.classList.remove('hidden');
+                    this.innerHTML = 'Hide Clue <i class="fas fa-eye-slash ml-2"></i>';
+                } else {
+                    clueElement.classList.add('hidden');
+                    this.innerHTML = 'Reveal First Clue <i class="fas fa-eye ml-2"></i>';
+                }
+            });
+        });
 
-      // ===== Profile link events (desktop + mobile) =====
-      function activateFactory(link){
-        return function activate(e){
-          if (e.type === "keydown" && !(e.key === "Enter" || e.key === " ")) return;
-          e.preventDefault();
-          e.stopPropagation();
-          const state = link.getAttribute("data-auth") || "gate";
-          if (state === "gate") showModal("login"); else toggleDropdown();
-        };
-      }
-      const opts = { capture: true, passive: false };
-      [desktopLink, mobileLink].forEach(link => {
-        if (!link) return;
-        link.setAttribute("role", "button");
-        link.setAttribute("tabindex", "0");
-        const handler = activateFactory(link);
-        link.addEventListener("pointerdown", handler, opts);
-        link.addEventListener("pointerup",   handler, opts);
-        link.addEventListener("click",       handler, opts);
-        link.addEventListener("keydown",     handler, opts);
-        link.addEventListener("touchstart",  handler, opts);
-        link.addEventListener("touchend",    handler, opts);
-      });
+        // FAQ accordion functionality
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', function() {
+                const answer = this.nextElementSibling;
+                const icon = this.querySelector('i');
 
-      // Close dropdown when clicking/tapping outside
-      document.addEventListener("click", (e) => {
-        if(!dropdown || dropdown.hidden) return;
-        if (dropdown.contains(e.target) || (desktopLink && desktopLink.contains(e.target)) || (mobileLink && mobileLink.contains(e.target))) return;
-        dropdown.hidden = true;
-      }, opts);
+                // Toggle answer visibility
+                if (answer.classList.contains('hidden')) {
+                    answer.classList.remove('hidden');
+                    icon.classList.add('rotate-180');
+                } else {
+                    answer.classList.add('hidden');
+                    icon.classList.remove('rotate-180');
+                }
+            });
+        });
 
-      // Modal close (backdrop or ×)
-      modal?.addEventListener("click", (e) => {
-        if(e.target.matches("[data-auth-close='true']")) hideModal();
-      });
-      document.addEventListener("keydown", (e) => {
-        if(e.key === "Escape" && modal && !modal.hidden) hideModal();
-      });
+        // Signup modal functionality
+        const signupModal = document.getElementById('signup-modal');
+        const successModal = document.getElementById('success-modal');
+        const signupButtons = document.querySelectorAll('.signup-btn');
+        const closeModal = document.getElementById('close-modal');
+        const closeSuccessModal = document.getElementById('close-success-modal');
+        const signupForm = document.getElementById('signup-form');
 
-      // Tabs
-      tabs.forEach(t => t.addEventListener("click", () => switchTab(t.dataset.authTab)));
+        signupButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                signupModal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            });
+        });
 
-      // ===== Login (email + password) =====
-      loginForm?.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        loginStatus.textContent = "Checking…";
-        const fd = new FormData(loginForm);
-        const email = String(fd.get("email")||"").trim();
-        const password = String(fd.get("password")||"");
-        try{
-          const { error } = await sb.auth.signInWithPassword({ email, password });
-          if(error) throw error;
-          loginStatus.textContent = "Success.";
-          hideModal();
-        }catch(err){
-          loginStatus.textContent = err?.message || "Login failed.";
-        }
-      });
+        closeModal.addEventListener('click', function() {
+            signupModal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        });
 
-      // ===== Sign up =====
-      signupForm?.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        signupStatus.textContent = "Creating account…";
-        const fd = new FormData(signupForm);
-        const email = String(fd.get("email")||"").trim();
-        const username = String(fd.get("username")||"").trim();
-        const password = String(fd.get("password")||"");
-        const confirm = String(fd.get("confirm")||"");
-        if(password !== confirm){ signupStatus.textContent = "Passwords do not match."; return; }
-        if(username && !/^[a-z0-9_\. \-]{3,24}$/i.test(username)){ signupStatus.textContent = "Use 3–24 chars: letters, numbers, space, .-_"; return; }
-        try{
-          const { error } = await sb.auth.signUp({
-            email,
-            password,
-            options: {
-              data: username ? { username } : {},
-              emailRedirectTo: window.location.origin
+        closeSuccessModal.addEventListener('click', function() {
+            successModal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        });
+
+        signupForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Here you would typically send the form data to your server
+            // For this example, we'll just show the success modal
+
+            signupModal.classList.add('hidden');
+            successModal.classList.remove('hidden');
+
+            // Reset form
+            this.reset();
+        });
+
+        // Close modals when clicking outside
+        window.addEventListener('click', function(e) {
+            if (e.target === signupModal) {
+                signupModal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+            if (e.target === successModal) {
+                successModal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+
+                    // Close mobile menu if open
+                    const mobileMenu = document.getElementById('mobile-menu');
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                }
+            });
+        });
+    </script>
+    <script>
+        (() => {
+          // ===== CONFIG: fill these with your Supabase project details =====
+          const SUPABASE_URL = "https://nwdoflrxaxjutbhhceyw.supabase.co";
+          const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53ZG9mbHJ4YXhqdXRiaGhjZXl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE0NDUyOTEsImV4cCI6MjA3NzAyMTI5MX0.RTgzc0lkIVtm6TCtcnL-nktetP7UXZutDauXuZ29iNQ";
+
+          // ===== Init client =====
+          const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+          // ===== Elements =====
+          const profileLink = document.getElementById("authProfileLink");
+          const dropdown = document.getElementById("authProfileDropdown");
+          const pdName = document.getElementById("authPdName");
+          const goProfile = document.getElementById("authGoProfile");
+          const logoutBtn = document.getElementById("authLogoutBtn");
+
+          const modal = document.getElementById("authModal");
+          const loginForm = document.getElementById("authLoginForm");
+          const signupForm = document.getElementById("authSignupForm");
+          const loginStatus = document.getElementById("authLoginStatus");
+          const signupStatus = document.getElementById("authSignupStatus");
+          const tabs = Array.from(document.querySelectorAll("[data-auth-tab]"));
+          const loginPanel = document.getElementById("authLoginPanel");
+          const signupPanel = document.getElementById("authSignupPanel");
+
+          // ===== UI helpers =====
+          function labelFromUser(user){
+            const uname = user?.user_metadata?.username;
+            return uname && String(uname).trim() ? uname : (user?.email || "User");
+          }
+          function setLoggedInUI(user){
+            const label = labelFromUser(user);
+            if(profileLink){
+              profileLink.textContent = `My Profile (${label})`;
+              profileLink.setAttribute("data-auth","authed");
+            }
+            if(pdName) pdName.textContent = label;
+          }
+          function setLoggedOutUI(){
+            if(profileLink){
+              profileLink.textContent = "My Profile";
+              profileLink.setAttribute("data-auth","gate");
+            }
+            hideDropdown();
+          }
+          function showModal(which="login"){
+            if(!modal) return;
+            modal.hidden = false;
+            switchTab(which);
+            if(which === "login") loginStatus.textContent = "";
+            else signupStatus.textContent = "";
+          }
+          function hideModal(){ if(modal) modal.hidden = true; }
+          function toggleDropdown(){ if(dropdown) dropdown.hidden = !dropdown.hidden; }
+          function hideDropdown(){ if(dropdown) dropdown.hidden = true; }
+          function switchTab(which){
+            tabs.forEach(t => {
+              const is = t.dataset.authTab === which;
+              t.classList.toggle("is-active", is);
+              t.setAttribute("aria-selected", String(is));
+            });
+            const isLogin = which === "login";
+            loginPanel.classList.toggle("is-active", isLogin);
+            signupPanel.classList.toggle("is-active", !isLogin);
+            loginPanel.hidden = !isLogin;
+            signupPanel.hidden = isLogin;
+          }
+
+          // ===== Session bootstrap =====
+          (async () => {
+            const { data } = await sb.auth.getSession();
+            if(data?.session?.user){
+              setLoggedInUI(data.session.user);
+            } else {
+              setLoggedOutUI();
+            }
+          })();
+
+          // ===== Auth state listener =====
+          sb.auth.onAuthStateChange((_event, session) => {
+            if(session?.user){ setLoggedInUI(session.user); }
+            else { setLoggedOutUI(); }
+          });
+
+          // ===== Events =====
+          profileLink?.addEventListener("click", (e) => {
+            e.preventDefault();
+            const state = profileLink.getAttribute("data-auth");
+            if(state === "gate"){ showModal("login"); } else { toggleDropdown(); }
+          });
+
+          // Close dropdown when clicking outside
+          document.addEventListener("click", (e) => {
+            if(!dropdown || dropdown.hidden) return;
+            const within = dropdown.contains(e.target) || profileLink?.contains(e.target);
+            if(!within) hideDropdown();
+          });
+
+          // Modal close (backdrop or ×)
+          modal?.addEventListener("click", (e) => {
+            if(e.target.matches("[data-auth-close='true']")) hideModal();
+          });
+          document.addEventListener("keydown", (e) => {
+            if(e.key === "Escape" && modal && !modal.hidden) hideModal();
+          });
+
+          // Tabs
+          tabs.forEach(t => t.addEventListener("click", () => switchTab(t.dataset.authTab)));
+
+          // ===== Login (email + password) =====
+          loginForm?.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            loginStatus.textContent = "Checking…";
+            const fd = new FormData(loginForm);
+            const email = String(fd.get("email")||"").trim();
+            const password = String(fd.get("password")||"");
+            try{
+              const { error } = await sb.auth.signInWithPassword({ email, password });
+              if(error) throw error;
+              loginStatus.textContent = "Success.";
+              hideModal();
+            }catch(err){
+              loginStatus.textContent = err?.message || "Login failed.";
             }
           });
-          if(error) throw error;
-          signupStatus.textContent = "Check your email to verify your account.";
-        }catch(err){
-          signupStatus.textContent = err?.message || "Sign-up failed.";
-        }
-      });
 
-      // ===== Logout =====
-      logoutBtn?.addEventListener("click", async () => {
-        await sb.auth.signOut();
-        setLoggedOutUI(); // immediately reflect in UI
-      });
-
-      // Optional: clicking "My Profile" inside dropdown
-      goProfile?.addEventListener("click", () => hideDropdown());
-
-      // ===== Forgot password flow =====
-      function showResetModal(){ if(resetModal) resetModal.hidden = false; }
-      function hideResetModal(){ if(resetModal) resetModal.hidden = true; }
-      function showNewPwdModal(){ if(newPwdModal) newPwdModal.hidden = false; }
-      function hideNewPwdModal(){ if(newPwdModal) newPwdModal.hidden = true; }
-
-      // Open reset modal from login
-      forgotBtn?.addEventListener("click", () => {
-        hideModal();      // hide login modal if open
-        showResetModal(); // show email reset modal
-      });
-
-      // Close by clicking backdrop/×
-      resetModal?.addEventListener("click", (e) => {
-        if(e.target.matches("[data-auth-close='true']")) hideResetModal();
-      });
-      newPwdModal?.addEventListener("click", (e) => {
-        if(e.target.matches("[data-auth-close='true']")) hideNewPwdModal();
-      });
-
-      // Send reset email
-      resetForm?.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        resetStatus.textContent = "Sending reset link…";
-        const fd = new FormData(resetForm);
-        const email = String(fd.get("email")||"").trim();
-        try{
-          const { error } = await sb.auth.resetPasswordForEmail(email, {
-            redirectTo: window.location.origin
+          // ===== Sign up (email + password, optional username in user_metadata) =====
+          signupForm?.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            signupStatus.textContent = "Creating account…";
+            const fd = new FormData(signupForm);
+            const email = String(fd.get("email")||"").trim();
+            const username = String(fd.get("username")||"").trim();
+            const password = String(fd.get("password")||"");
+            const confirm = String(fd.get("confirm")||"");
+            if(password !== confirm){ signupStatus.textContent = "Passwords do not match."; return; }
+            if(username && !/^[a-z0-9_\. \-]{3,24}$/i.test(username)){ signupStatus.textContent = "Use 3–24 chars: letters, numbers, space, .-_"; return; }
+            try{
+              const { error } = await sb.auth.signUp({
+                email,
+                password,
+                options: {
+                  data: username ? { username } : {},
+                  emailRedirectTo: window.location.origin
+                }
+              });
+              if(error) throw error;
+              signupStatus.textContent = "Check your email to verify your account.";
+              // Keep modal open to show message; you can auto-close if you prefer.
+            }catch(err){
+              signupStatus.textContent = err?.message || "Sign-up failed.";
+            }
           });
-          if(error) throw error;
-          resetStatus.textContent = "Check your email for a reset link.";
-        }catch(err){
-          resetStatus.textContent = err?.message || "Failed to send reset link.";
-        }
-      });
 
-      // Update password after recovery
-      newPwdForm?.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        newPwdStatus.textContent = "Updating password…";
-        const fd = new FormData(newPwdForm);
-        const p = String(fd.get("password")||"");
-        const c = String(fd.get("confirm")||"");
-        if(p !== c){ newPwdStatus.textContent = "Passwords do not match."; return; }
-        try{
-          const { error } = await sb.auth.updateUser({ password: p });
-          if(error) throw error;
+          // ===== Logout =====
+          logoutBtn?.addEventListener("click", async () => {
+            await sb.auth.signOut();
+            setLoggedOutUI();
+          });
 
-          // refresh session and UI so "My Profile" is correct
-          const { data: sess } = await sb.auth.getSession();
-          if (sess?.session?.user) setLoggedInUI(sess.session.user);
+          // Optional: clicking "My Profile" link inside dropdown (placeholder until page exists)
+          goProfile?.addEventListener("click", () => hideDropdown());
+        })();
 
-          newPwdStatus.textContent = "Password updated. You are now signed in.";
-          setTimeout(() => { hideNewPwdModal(); }, 800);
-        }catch(err){
-          newPwdStatus.textContent = err?.message || "Failed to update password.";
-        }
-      });
-    })();
-  </script>
+        (() => {
+          const desktopLink = document.getElementById("authProfileLink");        // top nav
+          const mobileLink  = document.getElementById("authProfileLinkMobile");   // mobile menu item
+          const modal       = document.getElementById("authModal");
+          const dropdown    = document.getElementById("authProfileDropdown");
+
+          if (!desktopLink && !mobileLink) return;
+
+          function openAuthModal(){
+            try { if (typeof showModal === "function") { showModal("login"); return; } } catch {}
+            if (modal) modal.hidden = false;
+          }
+
+          function toggleMenu(){ if (dropdown) dropdown.hidden = !dropdown.hidden; }
+
+          function activate(e){
+            if (e.type === "keydown" && !(e.key === "Enter" || e.key === " ")) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const state = (desktopLink || e.currentTarget).getAttribute("data-auth") || "gate"; // "gate" | "authed"
+            if (state === "gate") openAuthModal(); else toggleMenu();
+          }
+
+          const opts = { capture: true, passive: false };
+          [desktopLink, mobileLink].forEach(link => {
+            if (!link) return;
+            link.setAttribute("role", "button");
+            link.setAttribute("tabindex", "0");
+            link.addEventListener("touchstart", activate, opts);
+            link.addEventListener("touchend",   activate, opts);
+            link.addEventListener("pointerup",  activate, opts);
+            link.addEventListener("click",      activate, opts);
+            link.addEventListener("keydown",    activate, opts);
+          });
+
+          // Close dropdown when tapping outside
+          document.addEventListener("click", (e) => {
+            if(!dropdown || dropdown.hidden) return;
+            if (dropdown.contains(e.target) || (desktopLink && desktopLink.contains(e.target))) return;
+            dropdown.hidden = true;
+          }, opts);
+        })();
+    </script>
 </body>
 </html>
+
