@@ -1080,8 +1080,25 @@
 
           // ===== Logout =====
           logoutBtn?.addEventListener("click", async () => {
-            await sb.auth.signOut();
-            setLoggedOutUI();
+            try {
+              await sb.auth.signOut();
+            } finally {
+              // Close any open modals/dropdowns and flip UI to logged-out
+              window.closeAllModals?.();
+              hideDropdown?.();
+              setLoggedOutUI();
+
+              // Clear any auth form fields to avoid lingering values
+              const authInputs = document.querySelectorAll('#authModal input');
+              authInputs.forEach(i => {
+                i.value = '';
+                if (i.type === 'password') i.setAttribute('autocomplete', 'new-password');
+                if (i.name === 'email') i.setAttribute('autocomplete', 'email');
+              });
+
+              // Hard refresh the current page to fully reset state & autofill UI
+              window.location.replace(window.location.pathname + window.location.search);
+            }
           });
 
           // Optional: clicking "My Profile" link inside dropdown (placeholder until page exists)
