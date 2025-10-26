@@ -755,16 +755,32 @@
           }
           function setLoggedInUI(user){
             const label = labelFromUser(user);
+            const profileLink = document.getElementById("authProfileLink");
+            const mobileLink  = document.getElementById("authProfileLinkMobile");
+            const pdName      = document.getElementById("authPdName");
+
             if(profileLink){
               profileLink.textContent = `My Profile (${label})`;
               profileLink.setAttribute("data-auth","authed");
             }
+            if(mobileLink){
+              mobileLink.textContent = `My Profile (${label})`;
+              mobileLink.setAttribute("data-auth","authed");
+            }
             if(pdName) pdName.textContent = label;
           }
+
           function setLoggedOutUI(){
+            const profileLink = document.getElementById("authProfileLink");
+            const mobileLink  = document.getElementById("authProfileLinkMobile");
+
             if(profileLink){
               profileLink.textContent = "My Profile";
               profileLink.setAttribute("data-auth","gate");
+            }
+            if(mobileLink){
+              mobileLink.textContent = "My Profile";
+              mobileLink.setAttribute("data-auth","gate");
             }
             hideDropdown();
           }
@@ -885,7 +901,7 @@
 
           // Optional: clicking "My Profile" link inside dropdown (placeholder until page exists)
           goProfile?.addEventListener("click", () => hideDropdown());
-          
+
           // === Forgot Password wiring ===
           const forgotBtn       = document.getElementById("authForgot");
           const resetModal      = document.getElementById("authResetModal");
@@ -934,11 +950,14 @@
 
           // Detect recovery state and show "set new password" modal
           sb.auth.onAuthStateChange((event, session) => {
-            if(event === "PASSWORD_RECOVERY"){
-              hideModal();
-              hideResetModal();
-              showNewPwdModal();
+            if (event === "PASSWORD_RECOVERY") {
+              // show the "set new password" modal if you aren't already
+              try { hideModal(); hideResetModal(); } catch {}
+              showNewPwdModal?.();
+              return;
             }
+            if(session?.user){ setLoggedInUI(session.user); }
+            else { setLoggedOutUI(); }
           });
 
           // Update password after recovery
@@ -950,8 +969,13 @@
             const c = String(fd.get("confirm")||"");
             if(p !== c){ newPwdStatus.textContent = "Passwords do not match."; return; }
             try{
-              const { data, error } = await sb.auth.updateUser({ password: p });
+              const { error } = await sb.auth.updateUser({ password: p });
               if(error) throw error;
+
+              // refresh session and UI so "My Profile" becomes clickable again
+              const { data: sess } = await sb.auth.getSession();
+              if (sess?.session?.user) { setLoggedInUI(sess.session.user); }
+
               newPwdStatus.textContent = "Password updated. You are now signed in.";
               setTimeout(() => { hideNewPwdModal(); }, 800);
             }catch(err){
