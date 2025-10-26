@@ -787,12 +787,12 @@
           function setLoggedInUI(user){
             const label = labelFromUser(user);
             if(profileLink){
-              profileLink.textContent = `My Profile (${label})`;
+              profileLink.textContent = `(${label})`;
               profileLink.setAttribute("data-auth","authed");
             }
             const mobileLink = document.getElementById("authProfileLinkMobile");
             if (mobileLink) {
-              mobileLink.textContent = `My Profile (${label})`;
+              mobileLink.textContent = `(${label})`;
               mobileLink.setAttribute("data-auth","authed");
             }
 
