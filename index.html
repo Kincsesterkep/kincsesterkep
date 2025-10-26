@@ -843,49 +843,6 @@
 
           // Optional: clicking "My Profile" link inside dropdown (placeholder until page exists)
           goProfile?.addEventListener("click", () => hideDropdown());
-        })();
-
-        (() => {
-          const desktopLink = document.getElementById("authProfileLink");        // top nav
-          const mobileLink  = document.getElementById("authProfileLinkMobile");   // mobile menu item
-          const modal       = document.getElementById("authModal");
-          const dropdown    = document.getElementById("authProfileDropdown");
-
-          if (!desktopLink && !mobileLink) return;
-
-          function openAuthModal(){
-            try { if (typeof showModal === "function") { showModal("login"); return; } } catch {}
-            if (modal) modal.hidden = false;
-          }
-
-          function toggleMenu(){ if (dropdown) dropdown.hidden = !dropdown.hidden; }
-
-          function activate(e){
-            if (e.type === "keydown" && !(e.key === "Enter" || e.key === " ")) return;
-            e.preventDefault();
-            e.stopPropagation();
-            const state = (desktopLink || e.currentTarget).getAttribute("data-auth") || "gate"; // "gate" | "authed"
-            if (state === "gate") openAuthModal(); else toggleMenu();
-          }
-
-          const opts = { capture: true, passive: false };
-          [desktopLink, mobileLink].forEach(link => {
-            if (!link) return;
-            link.setAttribute("role", "button");
-            link.setAttribute("tabindex", "0");
-            link.addEventListener("touchstart", activate, opts);
-            link.addEventListener("touchend",   activate, opts);
-            link.addEventListener("pointerup",  activate, opts);
-            link.addEventListener("click",      activate, opts);
-            link.addEventListener("keydown",    activate, opts);
-          });
-
-          // Close dropdown when tapping outside
-          document.addEventListener("click", (e) => {
-            if(!dropdown || dropdown.hidden) return;
-            if (dropdown.contains(e.target) || (desktopLink && desktopLink.contains(e.target))) return;
-            dropdown.hidden = true;
-          }, opts);
 
           // === Forgot Password wiring ===
           const forgotBtn       = document.getElementById("authForgot");
@@ -959,7 +916,49 @@
               newPwdStatus.textContent = err?.message || "Failed to update password.";
             }
           });
+        })();
 
+        (() => {
+          const desktopLink = document.getElementById("authProfileLink");        // top nav
+          const mobileLink  = document.getElementById("authProfileLinkMobile");   // mobile menu item
+          const modal       = document.getElementById("authModal");
+          const dropdown    = document.getElementById("authProfileDropdown");
+
+          if (!desktopLink && !mobileLink) return;
+
+          function openAuthModal(){
+            try { if (typeof showModal === "function") { showModal("login"); return; } } catch {}
+            if (modal) modal.hidden = false;
+          }
+
+          function toggleMenu(){ if (dropdown) dropdown.hidden = !dropdown.hidden; }
+
+          function activate(e){
+            if (e.type === "keydown" && !(e.key === "Enter" || e.key === " ")) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const state = (desktopLink || e.currentTarget).getAttribute("data-auth") || "gate"; // "gate" | "authed"
+            if (state === "gate") openAuthModal(); else toggleMenu();
+          }
+
+          const opts = { capture: true, passive: false };
+          [desktopLink, mobileLink].forEach(link => {
+            if (!link) return;
+            link.setAttribute("role", "button");
+            link.setAttribute("tabindex", "0");
+            link.addEventListener("touchstart", activate, opts);
+            link.addEventListener("touchend",   activate, opts);
+            link.addEventListener("pointerup",  activate, opts);
+            link.addEventListener("click",      activate, opts);
+            link.addEventListener("keydown",    activate, opts);
+          });
+
+          // Close dropdown when tapping outside
+          document.addEventListener("click", (e) => {
+            if(!dropdown || dropdown.hidden) return;
+            if (dropdown.contains(e.target) || (desktopLink && desktopLink.contains(e.target))) return;
+            dropdown.hidden = true;
+          }, opts);
         })();
 
         <!-- Request password reset (enter email) -->
