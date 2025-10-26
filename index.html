@@ -678,11 +678,49 @@
         const signupForm = document.getElementById('signup-form');
 
         signupButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                signupModal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            });
+          button.addEventListener('click', async function (e) {
+            e.preventDefault();
+
+            // 1) Remember user intent + which competition they clicked
+            const pickedName = this.getAttribute('data-competition') || '';
+
+            window.__intentSignup = { wanted: true, competition: pickedName };
+
+            // 2) Check auth session
+            const { data } = await sb.auth.getSession();
+            const user = data?.session?.user || null;
+
+            if (!user) {
+              // Not logged in -> open Login/Register
+              if (typeof window.__authShowModal === 'function') {
+                window.__authShowModal('login');
+              } else {
+                // Fallback: directly unhide modal if helper not exposed
+                const modal = document.getElementById('authModal');
+                if (modal) modal.hidden = false;
+              }
+              return;
+            }
+
+            // 3) Logged in -> show the signup modal
+            openSignupModalAndPrefill(pickedName);
+          });
         });
+
+        function openSignupModalAndPrefill(name) {
+          try {
+            if (name) {
+              const select = document.getElementById('competition');
+              if (select) {
+                // Try to select by exact text match
+                const opt = Array.from(select.options).find(o => o.textContent.trim() === name);
+                if (opt) select.value = opt.value;
+              }
+            }
+          } catch {}
+          signupModal.classList.remove('hidden');
+          document.body.style.overflow = 'hidden';
+        }
 
         closeModal.addEventListener('click', function() {
             signupModal.classList.add('hidden');
@@ -957,6 +995,25 @@
               if(error) throw error;
               loginStatus.textContent = "Success.";
               hideModal();
+              // If the user clicked "Sign Up" on a competition while logged out,
+              // continue that flow now that they're authenticated.
+              try {
+                if (window.__intentSignup?.wanted) {
+                  const cname = window.__intentSignup.competition || '';
+                  // Use the global helper from step 2
+                  if (typeof openSignupModalAndPrefill === 'function') {
+                    openSignupModalAndPrefill(cname);
+                  } else {
+                    // Fallback: just open the modal
+                    const signupModal = document.getElementById('signup-modal');
+                    if (signupModal) signupModal.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                  }
+                  // Reset intent
+                  window.__intentSignup = { wanted: false, competition: '' };
+                }
+              } catch {}
+
             }catch(err){
               loginStatus.textContent = err?.message || "Login failed.";
             }
