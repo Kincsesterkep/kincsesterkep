@@ -236,7 +236,6 @@
       return (uname && String(uname).trim()) ? uname : (user?.email || "User");
     }
     function paintUser(user){
-      helloLine.textContent = `Welcome, ${labelFromUser(user)}!`;
       userName.textContent  = labelFromUser(user);
       userEmail.textContent = user?.email || "";
       document.title = `${labelFromUser(user)} • My Profile`;
