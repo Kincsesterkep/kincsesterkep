@@ -81,6 +81,11 @@
     <!-- Supabase JS (CDN) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <!-- Mobile tap/click reliability -->
+    #authProfileLink { position: relative; z-index: 5; pointer-events: auto; }
+    .auth-modal{ z-index: 1000; }
+    .auth-profile-dropdown{ z-index: 1001; }
+
 </head>
 <body class="bg-amber-50 font-sans">
     <!-- Navigation -->
@@ -752,12 +757,36 @@
             else { setLoggedOutUI(); }
           });
 
-          // ===== Events =====
-          profileLink?.addEventListener("click", (e) => {
+          // ===== Events (mobile-safe) =====
+        (() => {
+          const profileLink = document.getElementById("authProfileLink");
+          const dropdown = document.getElementById("authProfileDropdown");
+          const modal = document.getElementById("authModal");
+
+          if (!profileLink) return;
+
+          // Accessibility + reliability on mobile
+          profileLink.setAttribute("role", "button");
+          profileLink.setAttribute("tabindex", "0");
+
+          function handleActivate(e){
+            if (e.type === "keydown" && !(e.key === "Enter" || e.key === " ")) return;
             e.preventDefault();
-            const state = profileLink.getAttribute("data-auth");
-            if(state === "gate"){ showModal("login"); } else { toggleDropdown(); }
+
+            const state = profileLink.getAttribute("data-auth"); // "gate" | "authed"
+
+            if (state === "gate") {
+              try { if (typeof showModal === "function") { showModal("login"); return; } } catch {}
+              if (modal) modal.hidden = false;
+            } else {
+              if (dropdown) dropdown.hidden = !dropdown.hidden;
+            }
+          }
+
+          ["click", "touchend", "pointerup", "keydown"].forEach(type => {
+            profileLink.addEventListener(type, handleActivate, { passive: false });
           });
+        })();
 
           // Close dropdown when clicking outside
           document.addEventListener("click", (e) => {
