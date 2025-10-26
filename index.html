@@ -677,33 +677,7 @@
         const closeSuccessModal = document.getElementById('close-success-modal');
         const signupForm = document.getElementById('signup-form');
 
-        signupButtons.forEach(button => {
-          button.addEventListener('click', async function (e) {
-            e.preventDefault();
 
-            // 1) Remember user intent + which competition they clicked
-            const pickedName = this.getAttribute('data-competition') || '';
-
-            window.__intentSignup = { wanted: true, competition: pickedName };
-
-            // 2) Check auth session
-            const { data } = await sb.auth.getSession();
-            const user = data?.session?.user || null;
-
-            if (!user) {
-              // Not logged in -> open Login/Register
-              if (typeof window.__authShowModal === 'function') {
-                window.__authShowModal('login');
-              } else {
-                // Fallback: directly unhide modal if helper not exposed
-                const modal = document.getElementById('authModal');
-                if (modal) modal.hidden = false;
-              }
-              return;
-            }
-
-            // 3) Logged in -> show the signup modal
-            openSignupModalAndPrefill(pickedName);
           });
         });
 
@@ -810,6 +784,29 @@
           const loginPanel = document.getElementById("authLoginPanel");
           const signupPanel = document.getElementById("authSignupPanel");
 
+          // Signup UI elements reused here
+          const signupModalEl = document.getElementById('signup-modal');
+          const competitionSelectEl = document.getElementById('competition');
+
+          // Open the Sign Up modal and optionally preselect a competition
+          function openSignupModal(pickedName){
+            if (pickedName && competitionSelectEl) {
+              // set the <select> if there's a matching option
+              const opt = Array.from(competitionSelectEl.options).find(o => o.value === pickedName);
+              if (opt) competitionSelectEl.value = pickedName;
+            }
+            if (signupModalEl) {
+              signupModalEl.classList.remove('hidden');
+              document.body.style.overflow = 'hidden';
+            }
+          }
+
+          // Safe check for logged-in user (uses current session)
+          async function getCurrentUser(){
+            const { data } = await sb.auth.getSession();
+            return data?.session?.user || null;
+          }
+
           // Forgot / reset / new password elements
           const forgotBtn       = document.getElementById("authForgot");
           const resetModal      = document.getElementById("authResetModal");
@@ -900,8 +897,16 @@
               showNewPwdModal();
               return;
             }
-            if(session?.user){ setLoggedInUI(session.user); }
-            else { setLoggedOutUI(); }
+            if(session?.user){
+              setLoggedInUI(session.user);
+              if (window.__pendingSignup) {
+                const pickedName = window.__pendingSignup === true ? "" : String(window.__pendingSignup);
+                openSignupModal(pickedName);
+                window.__pendingSignup = null;
+              }
+            } else {
+              setLoggedOutUI();
+            }
           });
 
           // ===== Events =====
@@ -983,6 +988,32 @@
           // Tabs
           tabs.forEach(t => t.addEventListener("click", () => switchTab(t.dataset.authTab)));
 
+          // Gate Sign Up buttons: require auth, then open signup modal
+          const gatedSignupButtons = document.querySelectorAll(".signup-btn");
+          gatedSignupButtons.forEach(btn => {
+            // first remove any old handler that directly opened the modal
+            btn.replaceWith(btn.cloneNode(true));
+          });
+          document.querySelectorAll(".signup-btn").forEach(btn => {
+            btn.addEventListener("click", async (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+
+              const pickedName = btn.getAttribute("data-competition") || ""; // Step 4 you added earlier
+              const user = await getCurrentUser();
+
+              if (!user) {
+                // remember the intent, open Auth, show a friendly message
+                window.__pendingSignup = pickedName || true; // true means "open with no preselect"
+                showModal("login");
+                if (loginStatus) loginStatus.textContent = "Please log in (or sign up) to continue.";
+                return;
+              }
+
+              openSignupModal(pickedName);
+            });
+          });
+
           // ===== Login (email + password) =====
           loginForm?.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -995,24 +1026,13 @@
               if(error) throw error;
               loginStatus.textContent = "Success.";
               hideModal();
-              // If the user clicked "Sign Up" on a competition while logged out,
-              // continue that flow now that they're authenticated.
-              try {
-                if (window.__intentSignup?.wanted) {
-                  const cname = window.__intentSignup.competition || '';
-                  // Use the global helper from step 2
-                  if (typeof openSignupModalAndPrefill === 'function') {
-                    openSignupModalAndPrefill(cname);
-                  } else {
-                    // Fallback: just open the modal
-                    const signupModal = document.getElementById('signup-modal');
-                    if (signupModal) signupModal.classList.remove('hidden');
-                    document.body.style.overflow = 'hidden';
-                  }
-                  // Reset intent
-                  window.__intentSignup = { wanted: false, competition: '' };
-                }
-              } catch {}
+
+              // If user clicked "Sign Up" before logging in, finish the flow now
+              if (window.__pendingSignup) {
+                const pickedName = window.__pendingSignup === true ? "" : String(window.__pendingSignup);
+                openSignupModal(pickedName);
+                window.__pendingSignup = null;
+              }
 
             }catch(err){
               loginStatus.textContent = err?.message || "Login failed.";
