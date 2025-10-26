@@ -1,0 +1,361 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.7">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="en"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta charset="utf-8" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width,initial-scale=1" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;title&gt;My Profile • Kincsestérkép&lt;/title&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>/* Reuse your auth aesthetic for cards */</p>
+<p class="p1"><span class="Apple-converted-space">    </span>:root{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>--surface:#121624; --card:#161b33; --text:#e8eaf6; --border:#2a2f45; --muted:#b7bfd6;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.card {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: #fff;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-radius: 16px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>box-shadow: 0 20px 60px rgba(0,0,0,.08);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border: 1px solid rgba(0,0,0,.06);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>@media (prefers-color-scheme: dark){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>body{ background:#0b0f1d; color:var(--text) }</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.card { background: var(--card); border:1px solid var(--border); }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>/* Tabs */</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.tab-btn[aria-selected="true"]{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background:#f59e0b; color:white;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>/* Form look aligned with your modal forms */</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.set-form{ display:grid; gap:14px; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.set-form label{ display:grid; gap:6px; font-weight:600; }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.set-form input{</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background:#fff; border:1px solid #d1d5db; border-radius:10px; padding:10px 12px; color:#111827;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>@media (prefers-color-scheme: dark){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>.set-form input{ background:#0c1022; color:var(--text); border:1px solid var(--border);}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.status-line{ min-height:1.25rem; font-size:.95rem; color:#6b7280 }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>@media (prefers-color-scheme: dark){ .status-line{ color:var(--muted);} }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body class="bg-amber-50 font-sans min-h-screen flex flex-col"&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- Top Nav (same style as home) --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;nav class="bg-amber-900 text-amber-50 shadow-lg sticky top-0 z-50"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="container mx-auto px-4 py-3 flex justify-between items-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;a href="/" class="flex items-center space-x-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;i class="fas fa-map-marked-alt text-2xl"&gt;&lt;/i&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;span class="text-xl font-bold"&gt;Kincsestérkép&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/a&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="hidden md:flex space-x-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;a href="/" class="hover:text-amber-200 transition"&gt;Home&lt;/a&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;a href="/#competitions" class="hover:text-amber-200 transition"&gt;Competitions&lt;/a&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;a href="/#about" class="hover:text-amber-200 transition"&gt;About&lt;/a&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;a href="/#faq" class="hover:text-amber-200 transition"&gt;FAQ&lt;/a&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="md:hidden text-xl" id="mobile-menu-button"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;i class="fas fa-bars"&gt;&lt;/i&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="md:hidden hidden bg-amber-800 px-4 py-2" id="mobile-menu"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;a href="/" class="block py-2 hover:text-amber-200"&gt;Home&lt;/a&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;a href="/#competitions" class="block py-2 hover:text-amber-200"&gt;Competitions&lt;/a&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;a href="/#about" class="block py-2 hover:text-amber-200"&gt;About&lt;/a&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;a href="/#faq" class="block py-2 hover:text-amber-200"&gt;FAQ&lt;/a&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/nav&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- Header --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;header class="bg-amber-100 border-b border-amber-200"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="container mx-auto px-4 py-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;h1 class="text-3xl md:text-4xl font-bold text-amber-900"&gt;My Profile&lt;/h1&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;p class="text-amber-800 mt-1" id="helloLine"&gt;Loading…&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/header&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- Page Body --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;main class="container mx-auto px-4 py-8 grow"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="grid grid-cols-1 lg:grid-cols-4 gap-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;!-- Sidebar --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;aside class="card p-4 lg:p-5 h-fit"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="flex items-center gap-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="w-12 h-12 rounded-full grid place-items-center bg-amber-200 text-amber-900"&gt;👤&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="leading-tight"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="font-semibold" id="userName"&gt;User&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="text-sm text-gray-500" id="userEmail"&gt;email@example.com&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="mt-4 grid gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;button class="tab-btn w-full text-left px-3 py-2 rounded-md hover:bg-amber-50"</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>data-tab="settings" aria-selected="true"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;i class="fa-solid fa-gear mr-2"&gt;&lt;/i&gt; Settings</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;button class="tab-btn w-full text-left px-3 py-2 rounded-md hover:bg-amber-50"</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>data-tab="mycomps" aria-selected="false"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;i class="fa-solid fa-treasure-chest mr-2"&gt;&lt;/i&gt; My Competitions</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;button id="logoutBtn" class="mt-2 w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold px-3 py-2 rounded-md"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>Log out</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/aside&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;!-- Content --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;section class="lg:col-span-3 space-y-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- Settings --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="card p-5" data-panel="settings"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;h2 class="text-2xl font-bold mb-2"&gt;Settings&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p class="text-gray-600 mb-4"&gt;Update your public username or change your password.&lt;/p&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div class="grid md:grid-cols-2 gap-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- Username --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;h3 class="font-semibold mb-3"&gt;Update Username&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;form id="usernameForm" class="set-form"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>New username</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;input name="username" type="text" minlength="3" maxlength="24" placeholder="e.g. TreasureHunter42" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-4 py-2 rounded-md"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>Save username</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="status-line" id="usernameStatus"&gt;&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/form&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;!-- Password --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;h3 class="font-semibold mb-3"&gt;Change Password&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;form id="passwordForm" class="set-form"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>New password</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;input name="password" type="password" minlength="6" placeholder="Minimum 6 characters" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>Confirm new password</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>&lt;input name="confirm" type="password" minlength="6" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-4 py-2 rounded-md"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                  </span>Update password</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="status-line" id="passwordStatus"&gt;&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/form&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- My Competitions --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="card p-5" data-panel="mycomps" hidden&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;h2 class="text-2xl font-bold mb-2"&gt;My Competitions&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;p class="text-gray-600 mb-4"&gt;Only competitions you’ve **paid for** will appear here.&lt;/p&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div id="compsEmpty" class="text-gray-500"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>You have no paid competitions yet.</p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">          </span>&lt;div id="compsList" class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/section&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/main&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- Footer (same style family) --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;footer class="bg-amber-900 text-amber-200 mt-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="container mx-auto px-4 py-6 text-sm flex flex-wrap items-center justify-between gap-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="flex items-center gap-2"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;i class="fas fa-map-marked-alt"&gt;&lt;/i&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;span&gt;Kincsestérkép&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div&gt;&amp;copy; &lt;span id="yr"&gt;&lt;/span&gt; Kincsestérkép. All rights reserved.&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/footer&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- Supabase --&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>// ===== Mobile nav toggle (reused)</p>
+<p class="p1"><span class="Apple-converted-space">    </span>document.getElementById('mobile-menu-button')?.addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById('mobile-menu')?.classList.toggle('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// ===== Supabase config (use the same values as your home page)</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const SUPABASE_URL = "https://nwdoflrxaxjutbhhceyw.supabase.co";</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53ZG9mbHJ4YXhqdXRiaGhjZXl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE0NDUyOTEsImV4cCI6MjA3NzAyMTI5MX0.RTgzc0lkIVtm6TCtcnL-nktetP7UXZutDauXuZ29iNQ";</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// ===== Elements</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const helloLine = document.getElementById('helloLine');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const userName<span class="Apple-converted-space">  </span>= document.getElementById('userName');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const userEmail = document.getElementById('userEmail');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const logoutBtn = document.getElementById('logoutBtn');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>const usernameForm <span class="Apple-converted-space">  </span>= document.getElementById('usernameForm');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const usernameStatus = document.getElementById('usernameStatus');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>const passwordForm <span class="Apple-converted-space">  </span>= document.getElementById('passwordForm');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const passwordStatus = document.getElementById('passwordStatus');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>const tabs<span class="Apple-converted-space">  </span>= Array.from(document.querySelectorAll('.tab-btn'));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const panels= Array.from(document.querySelectorAll('[data-panel]'));</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>const compsList<span class="Apple-converted-space">  </span>= document.getElementById('compsList');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const compsEmpty = document.getElementById('compsEmpty');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// ===== Tabs</p>
+<p class="p1"><span class="Apple-converted-space">    </span>tabs.forEach(btn =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>btn.addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const target = btn.dataset.tab;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>tabs.forEach(b =&gt; b.setAttribute('aria-selected', String(b===btn)));</p>
+<p class="p1"><span class="Apple-converted-space">        </span>panels.forEach(p =&gt; p.hidden = (p.dataset.panel !== target));</p>
+<p class="p1"><span class="Apple-converted-space">      </span>});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// ===== Auth bootstrap / guard</p>
+<p class="p1"><span class="Apple-converted-space">    </span>(async function init(){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const { data } = await sb.auth.getSession();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const user = data?.session?.user;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if(!user){</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Not signed in → bounce to home and (optionally) ask to log in</p>
+<p class="p1"><span class="Apple-converted-space">        </span>window.location.href = "/#login-required";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>paintUser(user);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>await loadCompetitions(user);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>})();</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Keep UI refreshed if the session changes</p>
+<p class="p1"><span class="Apple-converted-space">    </span>sb.auth.onAuthStateChange((_evt, session) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const user = session?.user;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if(!user){ window.location.href = "/"; return; }</p>
+<p class="p1"><span class="Apple-converted-space">      </span>paintUser(user);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function labelFromUser(user){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const uname = user?.user_metadata?.username;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return (uname &amp;&amp; String(uname).trim()) ? uname : (user?.email || "User");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function paintUser(user){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>helloLine.textContent = `Welcome, ${labelFromUser(user)}!`;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>userName.textContent<span class="Apple-converted-space">  </span>= labelFromUser(user);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>userEmail.textContent = user?.email || "";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.title = `${labelFromUser(user)} • My Profile`;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById('yr').textContent = new Date().getFullYear();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// ===== Username update (user_metadata)</p>
+<p class="p1"><span class="Apple-converted-space">    </span>usernameForm?.addEventListener('submit', async (e) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>e.preventDefault();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>usernameStatus.textContent = "Saving…";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const fd = new FormData(usernameForm);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const username = String(fd.get('username')||'').trim();</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>if(username &amp;&amp; !/^[a-z0-9_. \-]{3,24}$/i.test(username)){</p>
+<p class="p1"><span class="Apple-converted-space">        </span>usernameStatus.textContent = "Use 3–24 chars: letters, numbers, space, .-_";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>try{</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const { data } = await sb.auth.getUser();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if(!data?.user){ throw new Error("Not signed in."); }</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>const { error } = await sb.auth.updateUser({ data: username ? { username } : {} });</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if(error) throw error;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>usernameStatus.textContent = "Username updated.";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>paintUser({ ...data.user, user_metadata: { ...data.user.user_metadata, username }});</p>
+<p class="p1"><span class="Apple-converted-space">        </span>usernameForm.reset();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}catch(err){</p>
+<p class="p1"><span class="Apple-converted-space">        </span>usernameStatus.textContent = err?.message || "Failed to update username.";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// ===== Password update</p>
+<p class="p1"><span class="Apple-converted-space">    </span>passwordForm?.addEventListener('submit', async (e) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>e.preventDefault();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>passwordStatus.textContent = "Updating password…";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const fd = new FormData(passwordForm);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const p = String(fd.get('password')||'');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const c = String(fd.get('confirm')||'');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>if(p.length &lt; 6){ passwordStatus.textContent = "Password must be at least 6 characters."; return; }</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if(p !== c){ passwordStatus.textContent = "Passwords do not match."; return; }</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>try{</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const { error } = await sb.auth.updateUser({ password: p });</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if(error) throw error;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>passwordStatus.textContent = "Password updated successfully.";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>passwordForm.reset();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}catch(err){</p>
+<p class="p1"><span class="Apple-converted-space">        </span>passwordStatus.textContent = err?.message || "Failed to update password.";</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// ===== Log out</p>
+<p class="p1"><span class="Apple-converted-space">    </span>logoutBtn?.addEventListener('click', async () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>await sb.auth.signOut();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>window.location.href = "/";</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// ===== Competitions (paid only)</p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Create a table in Supabase called 'signups' with (recommended):</p>
+<p class="p1"><span class="Apple-converted-space">    </span>// <span class="Apple-converted-space">  </span>id uuid primary key default gen_random_uuid()</p>
+<p class="p1"><span class="Apple-converted-space">    </span>// <span class="Apple-converted-space">  </span>user_id uuid references auth.users(id) on delete cascade</p>
+<p class="p1"><span class="Apple-converted-space">    </span>// <span class="Apple-converted-space">  </span>competition_slug text</p>
+<p class="p1"><span class="Apple-converted-space">    </span>// <span class="Apple-converted-space">  </span>competition_title text</p>
+<p class="p1"><span class="Apple-converted-space">    </span>// <span class="Apple-converted-space">  </span>paid boolean default false</p>
+<p class="p1"><span class="Apple-converted-space">    </span>// <span class="Apple-converted-space">  </span>paid_at timestamptz</p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Then RLS policy to allow: user can select rows where user_id = auth.uid()</p>
+<p class="p1"><span class="Apple-converted-space">    </span>async function loadCompetitions(user){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>try{</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Only show paid = true</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const { data, error } = await sb</p>
+<p class="p1"><span class="Apple-converted-space">          </span>.from('signups')</p>
+<p class="p1"><span class="Apple-converted-space">          </span>.select('id, competition_slug, competition_title, paid, paid_at')</p>
+<p class="p1"><span class="Apple-converted-space">          </span>.eq('user_id', user.id)</p>
+<p class="p1"><span class="Apple-converted-space">          </span>.eq('paid', true)</p>
+<p class="p1"><span class="Apple-converted-space">          </span>.order('paid_at', { ascending:false });</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>if(error) throw error;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>compsList.innerHTML = "";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const has = Array.isArray(data) &amp;&amp; data.length &gt; 0;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>compsEmpty.classList.toggle('hidden', has);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>if(has){</p>
+<p class="p1"><span class="Apple-converted-space">          </span>data.forEach(row =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const card = document.createElement('div');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>card.className = "p-4 rounded-xl border border-amber-200 bg-amber-50";</p>
+<p class="p1"><span class="Apple-converted-space">            </span>card.innerHTML = `</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div class="font-semibold text-amber-900"&gt;${row.competition_title || row.competition_slug}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div class="text-sm text-amber-800 mt-1"&gt;Paid on: ${row.paid_at ? new Date(row.paid_at).toLocaleString() : "—"}&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;div class="mt-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;a href="/#competitions" class="text-amber-700 hover:underline"&gt;View details&lt;/a&gt;</p>
+<p class="p1"><span class="Apple-converted-space">              </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>`;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>compsList.appendChild(card);</p>
+<p class="p1"><span class="Apple-converted-space">          </span>});</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}catch(err){</p>
+<p class="p1"><span class="Apple-converted-space">        </span>compsEmpty.textContent = "Could not load competitions.";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>console.error(err);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
