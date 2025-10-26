@@ -890,7 +890,7 @@
           }
 
           const opts = { capture: true, passive: false };
-          [desktopLink, mobileLink].forEach(link => {
+          [mobileLink].forEach(link => {
             if (!link) return;
             link.setAttribute("role", "button");
             link.setAttribute("tabindex", "0");
