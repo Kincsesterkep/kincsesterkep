@@ -15,11 +15,11 @@ const REDIRECT_BASE = "https://kincsesterkep.com";
 
 // Competition name -> Stripe Price ID (replace with your real Price IDs)
 const PRICE_BY_COMP: Record<string, string> = {
-  "The Lost Pirate Gold":       "price_1SMgx42cuBeiyoJUDraXBcyS_lostpirate",
-  "Pharaoh's Forgotten Tomb":   "price_1SMgxx2cuBeiyoJUpG3qmLSc_pharaoh",
-  "The Dragon's Hoard":         "price_1SMgyI2cuBeiyoJUeSjjxVwH_dragon",
-  "The Arctic Expedition":      "price_1SMgyb2cuBeiyoJUV4UUGDxK_arctic",
-  "The Urban Treasure Trail":   "price_1SMgz62cuBeiyoJU0qhkN0XP_urban",
+  "The Lost Pirate Gold":       "price_1SMgx42cuBeiyoJUDraXBcyS",
+  "Pharaoh's Forgotten Tomb":   "price_1SMgxx2cuBeiyoJUpG3qmLSc",
+  "The Dragon's Hoard":         "price_1SMgyI2cuBeiyoJUeSjjxVwH",
+  "The Arctic Expedition":      "price_1SMgyb2cuBeiyoJUV4UUGDxK",
+  "The Urban Treasure Trail":   "price_1SMgz62cuBeiyoJU0qhkN0XP",
 };
 
 function json(data: unknown, status = 200) {
