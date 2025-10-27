@@ -410,9 +410,9 @@
                     <input type="email" id="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
                 </div>
                 <div class="mb-4">
-                    <label for="competition" class="block text-gray-700 font-medium mb-2">Competition</label>
-                    <select id="competition" class="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
-                    </select>
+                  <label class="block text-gray-700 font-medium mb-2">Competition</label>
+                  <input id="competition-display" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100" readonly>
+                  <input id="competition-hidden" name="competition" type="hidden">
                 </div>
                 <div class="mb-6">
                     <label for="team-size" class="block text-gray-700 font-medium mb-2">Team Size</label>
@@ -790,15 +790,17 @@
           // Signup UI elements reused here
           const signupModalEl = document.getElementById('signup-modal');
           const competitionSelectEl = document.getElementById('competition');
+          const compDisplayEl = document.getElementById('competition-display');
+          const compHiddenEl  = document.getElementById('competition-hidden');
 
           // Open the Sign Up modal and optionally preselect a competition
           function openSignupModal(pickedName){
             window.closeAllModals?.();
-            if (pickedName && competitionSelectEl) {
-              // set the <select> if there's a matching option
-              const opt = Array.from(competitionSelectEl.options).find(o => o.value === pickedName);
-              if (opt) competitionSelectEl.value = pickedName;
-            }
+
+            // Fill the read-only display + hidden field
+            if (compDisplayEl) compDisplayEl.value = pickedName || '';
+            if (compHiddenEl)  compHiddenEl.value  = pickedName || '';
+
             if (signupModalEl) {
               signupModalEl.classList.remove('hidden');
               document.body.style.overflow = 'hidden';
