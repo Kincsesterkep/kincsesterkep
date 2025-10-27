@@ -90,26 +90,27 @@
     </style>
 
     <style>
-      /* === Custom styling for Team Size dropdown === */
+      /* === Custom styling for Team Size dropdown (bold black V) === */
       #team-size {
         appearance: none;
         -webkit-appearance: none;
         -moz-appearance: none;
         background-color: #fff;
         border: 1px solid #d1d5db;
-        border-radius: 0.5rem;           /* rounded-lg */
+        border-radius: 0.5rem; /* rounded-lg */
         padding: 0.5rem 2.5rem 0.5rem 1rem;
         font-size: 1rem;
         color: #1f2937;
-        background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" fill="%23b45309" viewBox="0 0 20 20"><path d="M5.5 7l4.5 4.5L14.5 7z"/></svg>');
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black"><path d="M6 9l6 6 6-6" stroke="black" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>');
         background-repeat: no-repeat;
         background-position: right 0.8rem center;
-        background-size: 1rem;
+        background-size: 1.2rem; /* slightly larger, thicker V */
         transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        cursor: pointer;
       }
 
       #team-size:focus {
-        border-color: #f59e0b;          /* amber-500 */
+        border-color: #f59e0b; /* amber-500 */
         box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3);
         outline: none;
       }
